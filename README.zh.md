@@ -4,7 +4,7 @@
 
 **一个现代化的工具包，用于在 Python 应用中将“语义”与“实现”解耦。**
 
-[English](./README_PyNeedle.md) | [中文](./README_PyNeedle.zh.md)
+[English](./README.md) | [中文](./README.zh.md)
 
 ---
 

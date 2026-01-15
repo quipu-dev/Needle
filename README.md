@@ -4,7 +4,7 @@
 
 **A modern toolkit for decoupling meaning from implementation in Python applications.**
 
-[English](./README_PyNeedle.md) | [中文](./README_PyNeedle.zh.md)
+[English](./README.md) | [中文](./README.zh.md)
 
 ---
 
