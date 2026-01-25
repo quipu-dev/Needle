@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "[WIP] chore: 移除子包中的 readme 字段以解决构建路径问题", "type": "plan", "generator": {"id": "manual", "tool": "pyquipu-cli"}, "env": {"quipu": "0.1.0", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769358586.5644884, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[WIP] feat: 创建 GitHub Action 自动发布工作流", "type": "plan", "generator": {"id": "manual", "tool": "pyquipu-cli"}, "env": {"quipu": "0.1.0", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769359793.1080258, "duration_ms": 0}}
