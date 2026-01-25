@@ -6,7 +6,6 @@ build-backend = "hatchling.build"
 name = "pyneedle-runtime"
 version = "0.1.0"
 description = "Core runtime for the PyNeedle ecosystem."
-readme = "../../README.md"
 authors = [
     { name = "doucx", email = "doucxldh@gmail.com" },
 ]

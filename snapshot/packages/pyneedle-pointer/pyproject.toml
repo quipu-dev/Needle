@@ -6,7 +6,6 @@ build-backend = "hatchling.build"
 name = "pyneedle-pointer"
 version = "0.1.0"
 description = "Standard implementation of Semantic Pointers (L) for PyNeedle."
-readme = "../../README.md"
 authors = [
     { name = "doucx", email = "doucxldh@gmail.com" },
 ]
