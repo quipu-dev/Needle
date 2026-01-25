@@ -13,8 +13,8 @@ authors = [
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 dependencies = [
-    "pyneedle-spec == '0.1.0'",
-    "pyneedle-pointer == '0.1.0'",
+    "pyneedle-spec == 0.1.0",
+    "pyneedle-pointer == 0.1.0",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
