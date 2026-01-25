@@ -1,0 +1,60 @@
+[project]
+name = "pyneedle-monorepo"
+version = "0.1.0"
+description = "Needle"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "ruff",
+    "mypy",
+    "pyneedle",
+    "pyneedle-pointer",
+    "pyneedle-spec",
+]
+
+[tool.setuptools.packages.find]
+exclude = ["migrations*"]
+
+[tool.uv.workspace]
+members = [
+    "packages/*",
+]
+
+[tool.uv.sources]
+pyneedle = { workspace = true }
+pyneedle-runtime = { workspace = true }
+pyneedle-pointer = { workspace = true }
+pyneedle-spec = { workspace = true }
+
+[tool.pytest.ini_options]
+addopts = "-ra --cov=needle --cov-report=term-missing"
+testpaths = ["tests", "packages"]
+norecursedirs = ["tests/fixtures"]
+pythonpath = [
+    "packages/pyneedle-pointer/src",
+    "packages/pyneedle-runtime/src",
+    "packages/pyneedle-spec/src",
+]
+
+[tool.stitcher.targets.needle]
+scan_paths = [
+    "packages/pyneedle-spec/src",
+    "packages/pyneedle-pointer/src",
+    "packages/pyneedle-runtime/src",
+]
+stub_package = "packages/needle-stubs"
+
+[tool.pyright]
+include = ["packages", "tests"]
+extraPaths = [
+    "packages/pyneedle-spec/src",
+    "packages/pyneedle-pointer/src",
+    "packages/pyneedle-runtime/src",
+    "packages/pyneedle/src",
+    "packages/needle-stubs/src",
+]
