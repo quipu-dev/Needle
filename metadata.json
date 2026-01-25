@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "[COMMIT] chore: 配置 PyPI 发布元数据与 GitHub Action 自动化工作流", "type": "plan", "generator": {"id": "manual", "tool": "pyquipu-cli"}, "env": {"quipu": "0.1.0", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769359865.9799182, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[WIP] feat: 升级 GitHub Action 以支持 Scoped Tags 独立发布", "type": "plan", "generator": {"id": "manual", "tool": "pyquipu-cli"}, "env": {"quipu": "0.1.0", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769363246.2284324, "duration_ms": 0}}

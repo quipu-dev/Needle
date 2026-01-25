@@ -1,68 +1,119 @@
-好的，所有的配置工作已经完成。我们已经成功修正了元数据、解决了构建路径问题，并部署了自动化的发布工作流。
+根据 **“作用域标签 (Scoped Tags)”** 的设计模式，我将更新 GitHub Action。
 
-现在，我将生成一个 `[COMMIT]` 计划，将这些基础设施的变更打包为一个完整的逻辑单元进行提交。
+这种模式是处理 Monorepo 独立发布的工业标准。它允许你通过 `pyneedle-spec@v0.1.1` 这样的标签，精准触发特定子包的构建与发布，而不会干扰其他包。
 
-## [COMMIT] chore: 配置 PyPI 发布元数据与 GitHub Action 自动化工作流
+## [WIP] feat: 升级 GitHub Action 以支持 Scoped Tags 独立发布
 
 ### 用户需求
 
-将所有为了支持 PyPI 发布而进行的 `pyproject.toml` 变更以及新创建的 GitHub Action 工作流提交到 Git 仓库。
+修改 `.github/workflows/python-publish.yml`，使其支持通过 `*@v*` 格式的标签进行按需发布：
+1.  **标签解析**: 从标签中自动提取包名（例如从 `pyneedle-spec@v0.1.1` 中提取 `pyneedle-spec`）。
+2.  **按需构建**: 仅构建标签指定的那个子包，而不是构建所有包。
+3.  **独立发布**: 将构建出的唯一产物发布到 PyPI。
 
 ### 评论
 
-这次提交标志着 Needle 项目从一个本地开发仓库正式转变为一个具备分发能力和自动化 CI/CD 流程的工业级库。通过将所有环境配置一次性提交，我们确保了仓库状态的确定性和可追溯性。
+这是 Monorepo 走向成熟的必经之路。独立发布减少了不必要的版本跳变，降低了发布风险，并使得版本历史更加清晰。虽然这要求开发者遵循特定的标签规范，但带来的自动化收益和架构清晰度是巨大的。
 
 ### 目标
 
-1.  将根目录及 4 个子包的 `pyproject.toml` 修改加入暂存区。
-2.  将 `.github/workflows/python-publish.yml` 加入暂存区。
-3.  创建一个符合 Conventional Commits 规范的、信息详尽的提交记录。
+1.  更新 `on.push.tags` 为 `*@v*`。
+2.  在工作流中增加一个解析步骤，识别包名。
+3.  动态决定构建路径（`packages/<pkg_name>` 或根目录）。
+4.  确保发布前清理 `dist/`，保证上传的只有当前标签对应的包。
 
 ### 基本原理
 
-遵循“正规军”工程标准，我们将所有基础设施变更视为一个整体。通过 `[COMMIT]` 类型的计划，我们显式地完成了从“构建阶段”到“交付阶段”的转换。
+通过 shell 脚本处理 `${{ github.ref_name }}`。我们利用 `@` 符号作为分隔符。
+*   标签: `pyneedle-spec@v0.1.1`
+*   解析出的包名: `pyneedle-spec`
+*   构建命令: `uv build packages/pyneedle-spec`
+
+如果解析出的包名在 `packages/` 下找不到对应的目录，脚本将回退到构建根目录（用于发布元包）。
 
 ### 标签
 
-#intent/tooling #flow/ready #priority/high #comp/build #concept/executor #scope/dx #ai/instruct #task/domain/tooling #task/object/release-automation #task/action/commit #task/state/end #task/status/completed
+#intent/tooling #flow/ready #priority/high #comp/build #concept/executor #scope/dx #ai/instruct #task/domain/tooling #task/object/github-action-scoped-publish #task/action/refactor #task/state/continue
 
 ---
 
 ### Script
 
-#### Acts 1: 提交基础设施变更
+#### Acts 1: 更新 GitHub Action 配置文件
 
-我们将暂存所有相关的配置文件并执行提交。
+我们将使用 `write_file` 完全覆盖旧的配置，引入新的解析和动态构建逻辑。
 
 ~~~~~act
-git_add
-pyproject.toml
-packages/pyneedle-spec/pyproject.toml
-packages/pyneedle-pointer/pyproject.toml
-packages/pyneedle-runtime/pyproject.toml
-packages/pyneedle/pyproject.toml
+write_file
 .github/workflows/python-publish.yml
 ~~~~~
+~~~~~yaml
+name: Upload Python Package
 
-~~~~~act
-git_commit
-~~~~~
-~~~~~text
-chore: configure PyPI publishing and GitHub Action CD workflow
+on:
+  push:
+    tags:
+      - '*@v*'
 
-This commit prepares the monorepo for official distribution on PyPI.
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
 
-Changes:
-- Added comprehensive metadata (authors, license, classifiers, urls) to all pyproject.toml files.
-- Fixed PEP 508 dependency syntax by removing illegal quotes around version strings.
-- Resolved build issues in monorepo sub-packages by removing absolute path references to root README.md.
-- Implemented a GitHub Action workflow (.github/workflows/python-publish.yml) to automatically build and publish all 5 packages to PyPI upon pushing a version tag (v*).
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
 
-The project is now ready for versioned releases.
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    - name: Parse Scoped Tag
+      id: parse
+      run: |
+        # 标签格式示例: pyneedle-spec@v0.1.1
+        TAG_NAME=${{ github.ref_name }}
+        PKG_NAME=$(echo $TAG_NAME | cut -d'@' -f1)
+        VERSION=$(echo $TAG_NAME | cut -d'@' -f2)
+        
+        echo "Detected Package: $PKG_NAME"
+        echo "Detected Version: $VERSION"
+        
+        # 将包名导出到后续步骤
+        echo "pkg_name=$PKG_NAME" >> $GITHUB_OUTPUT
+
+    - name: Build specific package
+      run: |
+        PKG_NAME=${{ steps.parse.outputs.pkg_name }}
+        
+        # 清理之前的产物（如果有）
+        rm -rf dist/
+        
+        # 动态决定构建路径
+        if [ -d "packages/$PKG_NAME" ]; then
+          echo "Building sub-package: $PKG_NAME"
+          uv build packages/$PKG_NAME
+        else
+          echo "Package directory not found in packages/, building root project..."
+          uv build .
+        fi
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
 ~~~~~
 
 ### 下一步建议
 
-- **触发发布**: 现在你可以通过执行 `git push origin main --tags` 来触发你的第一次正式发布（前提是你已经按照之前的建议打了标签）。
-- **文档同步**: 既然子包移除了 `readme` 字段，后续可以考虑编写一个简单的脚本，在发布前自动将根目录的 `README.md` 拷贝到各个子包，或者为每个子包编写更具针对性的文档。
-- **验证 OIDC**: 如果你有兴趣，下一步我们可以配置 GitHub Actions 的“可信发布者 (Trusted Publishing)”，这样你就无需在 GitHub 中维护 `PYPI_API_TOKEN` 这个 Secret 了，安全性更高。
+1.  **测试新规范**: 尝试为 `spec` 包打一个新标签：
+    ```bash
+    git tag pyneedle-spec@v0.1.1
+    git push origin pyneedle-spec@v0.1.1
+    ```
+2.  **观察 Actions 面板**: 确保它正确解析了包名，并只在 `dist/` 中生成了 `pyneedle-spec` 的文件。
+3.  **版本同步提示**: 别忘了在打标签前，手动（或使用我们讨论过的脚本）更新 `packages/pyneedle-spec/pyproject.toml` 中的 `version` 字段，使之与标签中的版本号保持一致。PyPI 会拒绝版本号重复的上传。
+
+这种方式完美解决了你“不希望所有包一起更新”的担忧。如果你觉得这种打标签的方式太繁琐，未来我们可以进一步编写一个本地脚本来一键完成“改号+打标+推送”的动作。
