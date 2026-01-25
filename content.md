@@ -1,99 +1,68 @@
-既然测试发布已经圆满成功，现在是时候建立自动化的持续部署（CD）流程了。我们将创建一个 GitHub Action，当你推送以 `v` 开头的标签（例如 `v0.1.0`）时，它会自动构建并发布 monorepo 中的所有 5 个软件包。
+好的，所有的配置工作已经完成。我们已经成功修正了元数据、解决了构建路径问题，并部署了自动化的发布工作流。
 
-## [WIP] feat: 创建 GitHub Action 自动发布工作流
+现在，我将生成一个 `[COMMIT]` 计划，将这些基础设施的变更打包为一个完整的逻辑单元进行提交。
+
+## [COMMIT] chore: 配置 PyPI 发布元数据与 GitHub Action 自动化工作流
 
 ### 用户需求
 
-创建一个 GitHub Action 配置文件，实现以下自动化流程：
-1.  **触发条件**: 仅在推送版本标签（如 `v0.1.0`）时触发。
-2.  **构建逻辑**: 构建 monorepo 中的所有 5 个软件包。
-3.  **发布逻辑**: 使用存储在 GitHub Secrets 中的 API Key 将所有构建产物上传到 PyPI。
+将所有为了支持 PyPI 发布而进行的 `pyproject.toml` 变更以及新创建的 GitHub Action 工作流提交到 Git 仓库。
 
 ### 评论
 
-对于 Monorepo 项目，自动化发布不仅是提升开发者体验（DX）的手段，更是确保版本一致性的必要工具。手动发布多个包极易出错，而通过 CI 确保每一个标签都对应一组完整的、经过验证的包，是维持生态系统稳定性的最佳实践。
+这次提交标志着 Needle 项目从一个本地开发仓库正式转变为一个具备分发能力和自动化 CI/CD 流程的工业级库。通过将所有环境配置一次性提交，我们确保了仓库状态的确定性和可追溯性。
 
 ### 目标
 
-1.  在项目根目录下创建 `.github/workflows/python-publish.yml`。
-2.  配置工作流以使用 `uv` 进行快速构建。
-3.  配置发布步骤，使其能够处理 `dist/` 目录下的多个包产物。
+1.  将根目录及 4 个子包的 `pyproject.toml` 修改加入暂存区。
+2.  将 `.github/workflows/python-publish.yml` 加入暂存区。
+3.  创建一个符合 Conventional Commits 规范的、信息详尽的提交记录。
 
 ### 基本原理
 
-我们将使用官方推荐的 `pypa/gh-action-pypi-publish` 操作，因为它原生支持多包发布且具有良好的错误重试机制。工作流会首先确保环境中有最新的 `uv`，然后执行与我们之前手动操作相同的构建序列。最终，所有在 `dist/` 目录中生成的 `.whl` 和 `.tar.gz` 文件都会被批量上传。
+遵循“正规军”工程标准，我们将所有基础设施变更视为一个整体。通过 `[COMMIT]` 类型的计划，我们显式地完成了从“构建阶段”到“交付阶段”的转换。
 
 ### 标签
 
-#intent/build #flow/ready #priority/high #comp/build #concept/executor #scope/dx #ai/instruct #task/domain/tooling #task/object/github-action-cd #task/action/implementation #task/state/continue
+#intent/tooling #flow/ready #priority/high #comp/build #concept/executor #scope/dx #ai/instruct #task/domain/tooling #task/object/release-automation #task/action/commit #task/state/end #task/status/completed
 
 ---
 
 ### Script
 
-#### Acts 1: 创建 GitHub 工作流目录及配置文件
+#### Acts 1: 提交基础设施变更
 
-我们将首先创建必要的目录结构，然后写入 YAML 配置文件。请确保你在 GitHub 仓库的 **Settings > Secrets and variables > Actions** 中创建了一个名为 `PYPI_API_TOKEN` 的 Secret，并填入你的 PyPI Token。
-
-~~~~~act
-run_command
-~~~~~
-~~~~~
-mkdir -p .github/workflows
-~~~~~
+我们将暂存所有相关的配置文件并执行提交。
 
 ~~~~~act
-write_file
+git_add
+pyproject.toml
+packages/pyneedle-spec/pyproject.toml
+packages/pyneedle-pointer/pyproject.toml
+packages/pyneedle-runtime/pyproject.toml
+packages/pyneedle/pyproject.toml
 .github/workflows/python-publish.yml
 ~~~~~
-~~~~~yaml
-name: Upload Python Package
 
-on:
-  push:
-    tags:
-      - 'v*'
+~~~~~act
+git_commit
+~~~~~
+~~~~~text
+chore: configure PyPI publishing and GitHub Action CD workflow
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
+This commit prepares the monorepo for official distribution on PyPI.
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
+Changes:
+- Added comprehensive metadata (authors, license, classifiers, urls) to all pyproject.toml files.
+- Fixed PEP 508 dependency syntax by removing illegal quotes around version strings.
+- Resolved build issues in monorepo sub-packages by removing absolute path references to root README.md.
+- Implemented a GitHub Action workflow (.github/workflows/python-publish.yml) to automatically build and publish all 5 packages to PyPI upon pushing a version tag (v*).
 
-    - name: Install uv
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-    - name: Build packages
-      run: |
-        # 依次构建所有组件，产物将存放在根目录的 dist/
-        uv build packages/pyneedle-spec
-        uv build packages/pyneedle-pointer
-        uv build packages/pyneedle-runtime
-        uv build packages/pyneedle
-        uv build .
-
-    - name: Publish all packages to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
-        # 如果你希望发布到 TestPyPI 进行验证，可以启用以下行
-        # repository-url: https://test.pypi.org/legacy/
+The project is now ready for versioned releases.
 ~~~~~
 
 ### 下一步建议
 
-1.  **配置密钥**: 请务必确认 GitHub 仓库中已配置名为 `PYPI_API_TOKEN` 的 Secret。
-2.  **首次发布**: 你可以尝试创建一个新标签并推送来触发此流程：
-    ```bash
-    git add .github/workflows/python-publish.yml
-    git commit -m "chore: add automated publishing workflow"
-    git tag v0.1.0
-    git push origin main --tags
-    ```
-3.  **安全性建议**: PyPI 现在支持基于 GitHub Actions 的 **Trusted Publishing (OIDC)**，这比使用长期有效的 API Token 更安全且无需手动配置 Secret。如果未来你希望进一步提升安全性，我可以指导你切换到该模式。
+- **触发发布**: 现在你可以通过执行 `git push origin main --tags` 来触发你的第一次正式发布（前提是你已经按照之前的建议打了标签）。
+- **文档同步**: 既然子包移除了 `readme` 字段，后续可以考虑编写一个简单的脚本，在发布前自动将根目录的 `README.md` 拷贝到各个子包，或者为每个子包编写更具针对性的文档。
+- **验证 OIDC**: 如果你有兴趣，下一步我们可以配置 GitHub Actions 的“可信发布者 (Trusted Publishing)”，这样你就无需在 GitHub 中维护 `PYPI_API_TOKEN` 这个 Secret 了，安全性更高。
