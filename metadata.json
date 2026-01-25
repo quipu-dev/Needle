@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "Capture: A .gitignore, A LICENSE, A README.md ... and 47 more files", "type": "capture", "generator": {"id": "manual", "tool": "pyquipu-cli"}, "env": {"quipu": "0.1.0", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769354992.1342225, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[WIP] chore: 完善项目根依赖配置与测试路径", "type": "plan", "generator": {"id": "manual", "tool": "pyquipu-cli"}, "env": {"quipu": "0.1.0", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769354997.0260992, "duration_ms": 0}}
