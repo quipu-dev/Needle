@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyneedle"
-version = "0.1.0"
+version = "0.1.1"
 description = "Batteries-included distribution of the PyNeedle runtime."
 authors = [
     { name = "doucx", email = "doucxldh@gmail.com" },
