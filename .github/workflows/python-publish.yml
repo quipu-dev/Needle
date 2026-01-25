@@ -1,0 +1,37 @@
+name: Upload Python Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    - name: Build packages
+      run: |
+        # 依次构建所有组件，产物将存放在根目录的 dist/
+        uv build packages/pyneedle-spec
+        uv build packages/pyneedle-pointer
+        uv build packages/pyneedle-runtime
+        uv build packages/pyneedle
+        uv build .
+
+    - name: Publish all packages to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        # 如果你希望发布到 TestPyPI 进行验证，可以启用以下行
+        # repository-url: https://test.pypi.org/legacy/
