@@ -155,39 +155,9 @@ def main():
 # 输出: 从文件加载的应用
 ```
 
-## 架构
-
-PyNeedle 是一个由多个专注的包组成的 monorepo：
-
--   `pyneedle-spec`: 定义所有组件的核心 `Protocol` 接口。
--   `pyneedle-pointer`: `SemanticPointer` (`L`) 和 `PointerSet` 的标准实现。
--   `pyneedle-nexus`: 标准的 `OverlayNexus` 运行时实现和像 `MemoryLoader` 这样的加载器。
--   `pyneedle-runtime`: 提供 `FileSystemLoader` 并将其他组件组合成“开箱即用”的 `needle` 包。
--   `pyneedle`: 面向用户的发行版，将以上所有组件组合成一个单一、易于使用的命名空间包。
-
 ## 安装
 
-由于本项目尚未发布到 PyPI，您需要从本地克隆进行安装。
-
-1.  **克隆仓库：**
-    ```bash
-    git clone https://github.com/doucx/stitcher-python.git
-    cd stitcher-python
-    ```
-
-2.  **创建并激活虚拟环境：**
-    ```bash
-    python -m venv .venv
-    source .venv/bin/activate
-    # 在 Windows 上: .venv\Scripts\activate
-    ```
-
-3.  **以可编辑模式安装项目及其开发依赖：**
-    ```bash
-    pip install -e .[dev]
-    ```
-    这将使 `needle` 包及其所有组件在您的环境中可用。
-
-## 许可证
-
-本项目采用 Apache License, Version 2.0 许可证。详情请参阅 [LICENSE](./LICENSE) 文件。
+通过 PyPI 安装：
+```bash
+pip install pyneedle
+```
