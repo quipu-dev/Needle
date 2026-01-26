@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "Capture: M pyproject.toml", "type": "capture", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769412748.6366868, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[WIP] fix(docs): 修复 PyPI 上的 README 跨语言链接", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769413197.17524, "duration_ms": 0}}
