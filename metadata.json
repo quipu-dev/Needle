@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "Capture: M release_manager.py", "type": "capture", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769411598.80974, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[WIP] refactor(docs): 为开发者和用户分离 README 文档", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769412679.7306232, "duration_ms": 0}}
