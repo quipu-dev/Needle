@@ -1,5 +1,7 @@
 # PyNeedle Monorepo
 
+![ico](./attachments/needle_ico.png)
+
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)
 
 This repository contains the source code for the PyNeedle ecosystem, a modern toolkit for decoupling meaning from implementation in Python applications.
