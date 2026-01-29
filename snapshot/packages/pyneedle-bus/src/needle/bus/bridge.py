@@ -32,8 +32,21 @@ class LogBridge:
                  If None, assumes topic IS the pointer (Auto-Bridge).
             level: The log level.
         """
-        target_ptr = ptr or topic
-        
+        target_ptr: Union[str, SemanticPointerProtocol]
+
+        if ptr is not None:
+            # Explicit mapping always wins.
+            target_ptr = ptr
+        elif not isinstance(topic, type):
+            # Auto-bridge for string/pointer topics.
+            target_ptr = topic
+        else:
+            # A type-based topic was given without an explicit pointer. This is an error.
+            raise TypeError(
+                f"Cannot auto-bridge event type '{getattr(topic, '__name__', 'UnknownType')}'. "
+                "An explicit 'ptr' (SemanticPointer) must be provided when connecting a type-based topic."
+            )
+
         def handler(event: Any):
             # Extract data for template formatting
             data = {}

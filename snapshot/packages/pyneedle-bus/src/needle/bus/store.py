@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import List, Dict, Optional
 
-from needle.runtime import I18NFactoryOperator, OverlayOperator
+from needle.operators import I18NFactoryOperator, OverlayOperator
 from needle.spec import OperatorProtocol
 
 
