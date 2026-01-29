@@ -101,22 +101,31 @@ print(f"不存在的键: {non_existent}")
 
 ### 指针代数
 
-创建指针集合以进行强大且富有表现力的操作。
+创建指针集合以进行强大且富有表现力的操作。PyNeedle 支持流畅的广播和多重索引。
 
 ```python
-from needle import L, PointerSet
+from needle import L
 
-# 定义一个基础指针集合
-user_fields = PointerSet([L.user.name, L.user.email])
+# 1. 多重索引快捷方式
+# 轻松创建一个指针集合 (PointerSet)
+user_fields = L.user['name', 'email']
+# 结果: PointerSet({L.user.name, L.user.email})
 
-# 在集合的每个成员上广播一个后缀
-form_labels = user_fields / "label"
+# 2. 属性与索引广播
+# 在整个集合上流畅地广播后缀或索引
+form_labels = user_fields.label
 # 结果: PointerSet({L.user.name.label, L.user.email.label})
 
-# 使用乘法进行类似笛卡尔积的扩展
+# 3. 笛卡尔积扩展
+# 使用乘法将单个指针扩展为集合
 actions = {"read", "write"}
 permissions = L.auth.user * actions
 # 结果: PointerSet({L.auth.user.read, L.auth.user.write})
+
+# 4. 高级链式调用
+# 组合所有特性，实现强大的资源寻址
+errors = L.api['v1', 'v2'][404].message
+# 结果: PointerSet({L.api.v1[404].message, L.api.v2[404].message})
 ```
 
 ### 基于文件的加载
