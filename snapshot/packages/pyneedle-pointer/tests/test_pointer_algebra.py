@@ -99,6 +99,40 @@ def test_pointer_recursive_flattening():
     assert ps3 == ps1
 
 
+def test_pointer_iteration_is_safe_and_unitary():
+    # Regression Test for Infinite Loop Bug
+    # Previously, iterating L would fall back to __getitem__(0...inf)
+    p = L.a.b.c
+    
+    # 1. Verify iteration yields only self
+    items = list(p)
+    assert len(items) == 1
+    assert items[0] is p
+    
+    # 2. Verify hashability is preserved
+    # (Implementing __iter__ shouldn't break __hash__ for immutable objects)
+    d = {p: "value"}
+    assert d[p] == "value"
+
+
+def test_pointer_static_analysis_duality():
+    # This test verifies that we can treat Union[Pointer, PointerSet] uniformly
+    # in a loop, simulating what static analysis expects.
+    
+    def process_items(items: Union[SemanticPointer, PointerSet]):
+        count = 0
+        for item in items:
+            assert isinstance(item, SemanticPointer)
+            count += 1
+        return count
+
+    # Case 1: Single Pointer
+    assert process_items(L.single) == 1
+    
+    # Case 2: Pointer Set
+    assert process_items(L.multiple * {"a", "b"}) == 2
+
+
 # --- PointerSet (Ls) Tests ---
 
 
