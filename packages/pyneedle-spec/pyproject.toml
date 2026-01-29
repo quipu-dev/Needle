@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyneedle-spec"
-version = "0.1.0"
+version = "0.1.1"
 description = "Core protocols and specifications for the PyNeedle ecosystem."
 authors = [
     { name = "doucx", email = "doucxldh@gmail.com" },
