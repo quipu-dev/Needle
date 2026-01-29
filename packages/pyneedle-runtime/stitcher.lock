@@ -50,7 +50,8 @@
     "py://packages/pyneedle-runtime/src/needle/operators/fs_operator.py#FileSystemOperator.root": {},
     "py://packages/pyneedle-runtime/src/needle/operators/helpers/json_handler.py#JsonHandler": {
       "baseline_code_signature_text": "class JsonHandler(FileHandlerProtocol):",
-      "baseline_code_structure_hash": "4e8a512ea40d82b05e441e8aa6cacb6326b46ca3c22ed913822c086f3e9e0770"
+      "baseline_code_structure_hash": "4e8a512ea40d82b05e441e8aa6cacb6326b46ca3c22ed913822c086f3e9e0770",
+      "baseline_yaml_content_hash": "d5d0840644bd6f2164d10e7548630f4db9481f12d2a744654a6c9d0e5ba6a28c"
     },
     "py://packages/pyneedle-runtime/src/needle/operators/helpers/json_handler.py#JsonHandler._flatten_dict": {
       "baseline_code_signature_text": "def _flatten_dict(self, d: Dict[str, Any], parent_key: str = '') -> Dict[str, str]:",
@@ -62,11 +63,13 @@
     },
     "py://packages/pyneedle-runtime/src/needle/operators/helpers/json_handler.py#JsonHandler.load": {
       "baseline_code_signature_text": "def load(self, path: Path) -> Dict[str, Any]:",
-      "baseline_code_structure_hash": "eabd26163ff572de5814f693e2b0ee951c1a9f1150be6aa50b3a914e0e8114bf"
+      "baseline_code_structure_hash": "eabd26163ff572de5814f693e2b0ee951c1a9f1150be6aa50b3a914e0e8114bf",
+      "baseline_yaml_content_hash": "2290b6e84dd1a3c1509219b3acd4cfacdf483d8fe2de5baf43a4a1b312521d41"
     },
     "py://packages/pyneedle-runtime/src/needle/operators/helpers/json_handler.py#JsonHandler.match": {
       "baseline_code_signature_text": "def match(self, path: Path) -> bool:",
-      "baseline_code_structure_hash": "038a100a9554d156488e14f71d321d8b71ba11afa9d140be448070643d79ace1"
+      "baseline_code_structure_hash": "038a100a9554d156488e14f71d321d8b71ba11afa9d140be448070643d79ace1",
+      "baseline_yaml_content_hash": "02cab1dcd06693c8d35e6806c10672aa989696e065ce02c6551b0cfae12e3d66"
     },
     "py://packages/pyneedle-runtime/src/needle/operators/helpers/json_handler.py#JsonHandler.save": {
       "baseline_code_signature_text": "def save(self, path: Path, data: Dict[str, Any]) -> bool:",
@@ -74,15 +77,18 @@
     },
     "py://packages/pyneedle-runtime/src/needle/operators/helpers/protocols.py#FileHandlerProtocol": {
       "baseline_code_signature_text": "class FileHandlerProtocol(Protocol):",
-      "baseline_code_structure_hash": "b1564b22a7e8be5775a96e955981a4539c9b3c9a2b62bffa5b3bf2e932ab7d13"
+      "baseline_code_structure_hash": "b1564b22a7e8be5775a96e955981a4539c9b3c9a2b62bffa5b3bf2e932ab7d13",
+      "baseline_yaml_content_hash": "3daef7dccc230b36ef9215c2115b83d126b2b5a45e71ac67c5eadf12a3fba971"
     },
     "py://packages/pyneedle-runtime/src/needle/operators/helpers/protocols.py#FileHandlerProtocol.load": {
       "baseline_code_signature_text": "def load(self, path: Path) -> Dict[str, Any]:",
-      "baseline_code_structure_hash": "eabd26163ff572de5814f693e2b0ee951c1a9f1150be6aa50b3a914e0e8114bf"
+      "baseline_code_structure_hash": "eabd26163ff572de5814f693e2b0ee951c1a9f1150be6aa50b3a914e0e8114bf",
+      "baseline_yaml_content_hash": "09810edf18281560d11d9e9681255ceb5d1cac83649e08c2520b026124120825"
     },
     "py://packages/pyneedle-runtime/src/needle/operators/helpers/protocols.py#FileHandlerProtocol.match": {
       "baseline_code_signature_text": "def match(self, path: Path) -> bool:",
-      "baseline_code_structure_hash": "038a100a9554d156488e14f71d321d8b71ba11afa9d140be448070643d79ace1"
+      "baseline_code_structure_hash": "038a100a9554d156488e14f71d321d8b71ba11afa9d140be448070643d79ace1",
+      "baseline_yaml_content_hash": "7d582ab2a37506c40d36803bdd63d58e423482628ec077c4024f45a3117b8408"
     },
     "py://packages/pyneedle-runtime/src/needle/operators/helpers/protocols.py#FileHandlerProtocol.save": {
       "baseline_code_signature_text": "def save(self, path: Path, data: Dict[str, Any]) -> bool:",

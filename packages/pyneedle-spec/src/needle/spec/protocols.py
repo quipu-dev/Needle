@@ -40,3 +40,7 @@ class PointerSetProtocol(Protocol):
 
 class OperatorProtocol(Protocol):
     def __call__(self, key: Any) -> Any: ...
+
+
+class RendererProtocol(Protocol):
+    def render(self, message: str, level: str = "info", **kwargs: Any) -> None: ...

@@ -5,10 +5,14 @@ from .protocols import (
     SemanticPointerProtocol,
     PointerSetProtocol,
     OperatorProtocol,
+    RendererProtocol,
 )
+from .events import GenericEventIR
 
 __all__ = [
     "SemanticPointerProtocol",
     "PointerSetProtocol",
     "OperatorProtocol",
+    "RendererProtocol",
+    "GenericEventIR",
 ]
