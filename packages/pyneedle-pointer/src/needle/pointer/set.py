@@ -12,6 +12,11 @@ class PointerSet(Set["SemanticPointer"], PointerSetProtocol):
         return self / name
 
     def __getitem__(self, key: Any) -> "PointerSet":
+        if isinstance(key, tuple):
+            # Rule: Multiple indices ps['a', 'b'] should broadcast and flatten.
+            # Equivalent to ps * key.
+            return self * key
+
         # Broadcast indexing to all pointers in the set.
         # This allows L["a", "b"][0] -> {L.a[0], L.b[0]}
         return PointerSet(p[key] for p in self)
