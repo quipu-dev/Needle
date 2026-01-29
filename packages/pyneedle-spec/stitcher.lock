@@ -3,6 +3,11 @@
     "py://packages/pyneedle-spec/src/needle/__init__.py#__path__": {},
     "py://packages/pyneedle-spec/src/needle/spec/__init__.py#__all__": {},
     "py://packages/pyneedle-spec/src/needle/spec/__init__.py#__path__": {},
+    "py://packages/pyneedle-spec/src/needle/spec/events.py#GenericEventIR": {
+      "baseline_code_signature_text": "class GenericEventIR(TypedDict):",
+      "baseline_code_structure_hash": "fa23c857475cf8bfb61ff1e33b11f722fe54590a479b7ac91cf0833146f07fe4",
+      "baseline_yaml_content_hash": "48687a393f87071107566bab3308f61ec3dfc636629b7e3a92bbbb1a108e4e74"
+    },
     "py://packages/pyneedle-spec/src/needle/spec/protocols.py#OperatorProtocol": {
       "baseline_code_signature_text": "class OperatorProtocol(Protocol):",
       "baseline_code_structure_hash": "be359ebb5ee2be3b14503f69ba151663819c18b32f0a8bfab1fd98b5f3df8095",
@@ -42,6 +47,16 @@
       "baseline_code_signature_text": "def __truediv__(self, other: Union[str, SemanticPointerProtocol]) -> PointerSetProtocol:",
       "baseline_code_structure_hash": "ed31760c74ba3e1680912f48511ea0f71a03210f2c0f66e02a477df04a20e5d9",
       "baseline_yaml_content_hash": "26ea2272dda6f4468c89d6cee2abf664e903e7e9b1936cd1bc1f0536323465b5"
+    },
+    "py://packages/pyneedle-spec/src/needle/spec/protocols.py#RendererProtocol": {
+      "baseline_code_signature_text": "class RendererProtocol(Protocol):",
+      "baseline_code_structure_hash": "9e1fa108308764ec3833c53b8f16623490290094df3788e10ba5bc578d0bd64a",
+      "baseline_yaml_content_hash": "27be085b20dfcc9949b17916f5317bdfe510abffa11295fe0755b05f52778fd9"
+    },
+    "py://packages/pyneedle-spec/src/needle/spec/protocols.py#RendererProtocol.render": {
+      "baseline_code_signature_text": "def render(self, message: str, level: str = 'info', **kwargs: Any = {}) -> None:",
+      "baseline_code_structure_hash": "57bc7dbe344574c09b6a51360029a7c9507a664bc79fc7f97bd18d5e14875205",
+      "baseline_yaml_content_hash": "005f9c6449a940c8bd4f11f7695139b7c344a4472c567fc7a0e7f2081e149e88"
     },
     "py://packages/pyneedle-spec/src/needle/spec/protocols.py#SemanticPointerProtocol": {
       "baseline_code_signature_text": "class SemanticPointerProtocol(Protocol[T_Pointer]):",

@@ -335,12 +335,14 @@ version = "0.1.0"
 source = { editable = "packages/pyneedle-bus" }
 dependencies = [
     { name = "pyneedle-pointer" },
+    { name = "pyneedle-runtime" },
     { name = "pyneedle-spec" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "pyneedle-pointer", editable = "packages/pyneedle-pointer" },
+    { name = "pyneedle-runtime", editable = "packages/pyneedle-runtime" },
     { name = "pyneedle-spec", editable = "packages/pyneedle-spec" },
 ]
 
