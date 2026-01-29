@@ -149,3 +149,43 @@ def test_pointer_multiplication_is_flexible_and_chainable():
     result5 = (L * {"http", "ftp"}) * 404
     expected5 = {L.http["404"], L.ftp["404"]}
     assert result5 == expected5
+
+
+def test_pointer_getitem_multi_index():
+    # Multi-index L['a', 'b'] should return a PointerSet
+    ps = L["a", "b"]
+    assert isinstance(ps, PointerSet)
+    assert len(ps) == 2
+    assert L.a in ps
+    assert L.b in ps
+
+    # Chaining with multi-index: L.api['v1', 'v2'].users
+    # This proves broadcasting works after the shortcut creation.
+    ps2 = L.api["v1", "v2"].users
+    assert ps2 == {L.api.v1.users, L.api.v2.users}
+
+
+def test_pointer_wildcard_indexing():
+    # Single index L['+'] should return a single SemanticPointer (Pattern)
+    p1 = L["+"]
+    assert isinstance(p1, SemanticPointer)
+    assert str(p1) == "+"
+
+    # MQTT style wildcard construction
+    p2 = L.check["#"]
+    assert isinstance(p2, SemanticPointer)
+    assert str(p2) == "check.#"
+
+    # Chaining after wildcard
+    p3 = L.check["+"] / "error"
+    assert str(p3) == "check.+.error"
+
+
+def test_pointer_set_getitem_broadcasting():
+    # Test broadcasting of __getitem__ on a PointerSet
+    ps = L["auth", "api"][0]
+    assert ps == {L.auth[0], L.api[0]}
+
+    # Combined complex chaining
+    ps2 = L["http", "ftp"].v1[404].detail
+    assert ps2 == {L.http.v1[404].detail, L.ftp.v1[404].detail}

@@ -31,8 +31,8 @@
       "baseline_yaml_content_hash": "c31c00255f6164ef77870a0fe577a6674357fff59a6f533702a514add55c4320"
     },
     "py://packages/pyneedle-pointer/src/needle/pointer/core.py#SemanticPointer.__getitem__": {
-      "baseline_code_signature_text": "def __getitem__(self, key: Union[str, int]) -> SemanticPointer:",
-      "baseline_code_structure_hash": "ea2d820a820ef4c2da5975c0d78770083d67f6970d939db260e8976f5f56779d",
+      "baseline_code_signature_text": "def __getitem__(self, key: Any) -> Union[SemanticPointer, PointerSetProtocol]:",
+      "baseline_code_structure_hash": "591c8beaff7d62dc4e0ffb397c37dadfb7bd1cbe9aac8fc7fb059e7267954509",
       "baseline_yaml_content_hash": "97a3cd079db535dc5dd8d01847bade1fc054f6ed1aa56ed34a9d8af6e5702bf7"
     },
     "py://packages/pyneedle-pointer/src/needle/pointer/core.py#SemanticPointer.__hash__": {
@@ -77,6 +77,14 @@
       "baseline_code_signature_text": "def __add__(self, other: Union[str, SemanticPointerProtocol]) -> PointerSet:",
       "baseline_code_structure_hash": "231d25289c0b2f52cc65d5fc05aa12a59d6289f89a73f7f2e51fe970be6716f6",
       "baseline_yaml_content_hash": "040b9b81a66074702862d2a406e98f8714a9f09cce55e9ad3de0648f1e85f30a"
+    },
+    "py://packages/pyneedle-pointer/src/needle/pointer/set.py#PointerSet.__getattr__": {
+      "baseline_code_signature_text": "def __getattr__(self, name: str) -> PointerSet:",
+      "baseline_code_structure_hash": "bf4d1323c9a0088f107a12887e5366855beae7e001b650067005cfb83240b3a4"
+    },
+    "py://packages/pyneedle-pointer/src/needle/pointer/set.py#PointerSet.__getitem__": {
+      "baseline_code_signature_text": "def __getitem__(self, key: Any) -> PointerSet:",
+      "baseline_code_structure_hash": "8d1315190fb7362914c9e89abadacfdbb51fabec807d3d6676dab215f960f14b"
     },
     "py://packages/pyneedle-pointer/src/needle/pointer/set.py#PointerSet.__mul__": {
       "baseline_code_signature_text": "def __mul__(self, other: Any) -> PointerSet:",
