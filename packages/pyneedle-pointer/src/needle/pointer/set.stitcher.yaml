@@ -1,7 +1,6 @@
 "PointerSet": |-
-  A collection of Semantic Pointers that supports algebraic broadcasting.
-
-  Inherits from built-in set, so standard set operations (union, difference) work as expected.
+  A collection of Semantic Pointers that acts as a Monad.
+  All operations are broadcasted to its members and results are auto-flattened.
 "PointerSet.__add__": |-
   Operator '+': Broadcasts the add operation to all members.
   Same as __truediv__ but for '+' operator preference.
@@ -13,3 +12,7 @@
   Operator '/': Broadcasts the join operation to all members.
 
   {L.a, L.b} / "end" -> {L.a.end, L.b.end}
+PointerSet._broadcast: |-
+  The core engine: Apply 'op' to each member.
+  If the result is a set/iterable (dimension expansion), flatten it.
+  Otherwise (position movement), just add it.
