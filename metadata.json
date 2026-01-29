@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "Capture: M uv.lock", "type": "capture", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769710557.9206638, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[WIP] feat(pointer): 为 PointerSet 实现属性访问的广播支持", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769710558.3679667, "duration_ms": 0}}
