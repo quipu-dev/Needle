@@ -386,7 +386,7 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "pyneedle-pointer"
-version = "0.2.0"
+version = "0.2.1"
 source = { editable = "packages/pyneedle-pointer" }
 dependencies = [
     { name = "pyneedle-spec" },
@@ -412,7 +412,7 @@ requires-dist = [
 
 [[package]]
 name = "pyneedle-spec"
-version = "0.1.4"
+version = "0.1.5"
 source = { editable = "packages/pyneedle-spec" }
 
 [[package]]

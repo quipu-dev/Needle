@@ -4,11 +4,6 @@ from needle.spec import SemanticPointerProtocol, RendererProtocol, OperatorProto
 
 
 class FeedbackBus:
-    """
-    The output channel for the application.
-    It relies on an injected Operator to resolve Pointers to Templates.
-    """
-
     def __init__(
         self,
         operator: Optional[OperatorProtocol] = None,
@@ -21,7 +16,6 @@ class FeedbackBus:
         self._renderer = renderer
 
     def set_operator(self, operator: OperatorProtocol) -> None:
-        """Inject the Operator (Nexus) responsible for resolving pointers."""
         self._operator = operator
 
     def _get_template(self, ptr: Union[str, SemanticPointerProtocol]) -> str:
@@ -43,16 +37,6 @@ class FeedbackBus:
         ptr: Union[str, SemanticPointerProtocol],
         **kwargs: Any,
     ) -> str:
-        """
-        Resolve a template and format it into a string without rendering.
-
-        Args:
-            ptr: Semantic Pointer or string ID of the template.
-            **kwargs: Arguments for template formatting.
-
-        Returns:
-            The fully formatted message string.
-        """
         template = self._get_template(ptr)
 
         try:
@@ -68,14 +52,6 @@ class FeedbackBus:
         level: str = "info",
         **kwargs: Any,
     ) -> None:
-        """
-        Present a message to the user via the registered renderer.
-
-        Args:
-            ptr: Semantic Pointer to the message template (e.g. L.io.file_saved)
-            level: 'info', 'success', 'warning', 'error', 'debug'
-            **kwargs: Arguments for template formatting
-        """
         if not self._renderer:
             return
 

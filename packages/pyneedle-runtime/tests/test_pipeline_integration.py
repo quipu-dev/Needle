@@ -1,4 +1,6 @@
 from pathlib import Path
+from typing import cast
+from needle.spec import SemanticPointerProtocol
 from needle.pointer import L
 from needle.operators import FileSystemOperator, OverlayOperator
 
@@ -33,7 +35,9 @@ def test_fs_pipeline_overrides(tmp_path: Path):
     assert pipeline(L.cli.help) == "Custom Help"
 
     # B. Fallback: Project doesn't have error.json, falls back to common
-    assert pipeline(L.error["404"]) == "Not Found"
+    # Cast is needed because L[...] returns Union[Pointer, Set]
+    key_404 = cast(SemanticPointerProtocol, L.error["404"])
+    assert pipeline(key_404) == "Not Found"
 
     # C. Missing
     assert pipeline(L.cli.unknown) is None

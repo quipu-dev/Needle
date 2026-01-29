@@ -6,13 +6,6 @@ from .feedback import FeedbackBus
 
 
 class LogBridge:
-    """
-    Connects the EventBus (Logic) to the FeedbackBus (Presentation).
-
-    It listens for events and attempts to render them using the FeedbackBus.
-    This enables 'Zero-Config Logging' if the Event Topic matches an I18n Key.
-    """
-
     def __init__(self, event_bus: EventBus, feedback_bus: FeedbackBus):
         self.event_bus = event_bus
         self.feedback_bus = feedback_bus
@@ -23,15 +16,6 @@ class LogBridge:
         ptr: Union[str, SemanticPointerProtocol, None] = None,
         level: str = "info",
     ) -> None:
-        """
-        Explicitly map an Event Topic to a Feedback Pointer.
-
-        Args:
-            topic: The event topic to listen for.
-            ptr: The I18n pointer to use for rendering.
-                 If None, assumes topic IS the pointer (Auto-Bridge).
-            level: The log level.
-        """
         target_ptr: Union[str, SemanticPointerProtocol]
 
         if ptr is not None:
