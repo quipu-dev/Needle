@@ -21,7 +21,9 @@ class PointerSet(Set["SemanticPointer"], PointerSetProtocol):
         for p in self:
             res = op(p)
             # Flatten if the result is an iterable (but not a string/pointer itself)
-            if isinstance(res, Iterable) and not isinstance(res, (str, bytes, SemanticPointerProtocol)):
+            if isinstance(res, Iterable) and not isinstance(
+                res, (str, bytes, SemanticPointerProtocol)
+            ):
                 new_set.update(res)
             else:
                 new_set.add(res)

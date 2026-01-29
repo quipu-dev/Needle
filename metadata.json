@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "fix: 修复由于 Protocol 无法进行运行时检查导致的测试失败。", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769713744.7275994, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "ruff Capture: M set.py, M uv.lock", "type": "capture", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769713973.5849662, "duration_ms": 0}}
