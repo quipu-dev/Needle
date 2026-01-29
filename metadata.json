@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "Capture: M set.py, M set.stitcher.yaml, M stitcher.lock ... and 1 more files", "type": "capture", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769714100.9870281, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[COMMIT] refactor: 实现单子化广播 PointerSet 并同步系统版本", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769714101.2967718, "duration_ms": 0}}
