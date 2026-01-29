@@ -184,7 +184,7 @@ def test_pointer_multiplication_is_flexible_and_chainable():
 
     # 4. Using non-string, non-pointer objects (fallback to str)
     result4 = L.status * 200
-    expected4 = {L.status["200"]}
+    expected4 = L.status["200"]
     assert result4 == expected4
 
     # 5. PointerSet with non-string, non-pointer objects
