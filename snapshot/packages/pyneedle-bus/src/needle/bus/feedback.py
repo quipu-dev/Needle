@@ -34,6 +34,30 @@ class FeedbackBus:
 
         return str(template)
 
+    def render_to_string(
+        self,
+        ptr: Union[str, SemanticPointerProtocol],
+        **kwargs: Any,
+    ) -> str:
+        """
+        Resolve a template and format it into a string without rendering.
+
+        Args:
+            ptr: Semantic Pointer or string ID of the template.
+            **kwargs: Arguments for template formatting.
+
+        Returns:
+            The fully formatted message string.
+        """
+        template = self._get_template(ptr)
+
+        try:
+            return template.format(**kwargs)
+        except KeyError as e:
+            return f"<formatting error for '{ptr}': missing key {e}>"
+        except Exception as e:
+            return f"<rendering error for '{ptr}': {e}>"
+
     def present(
         self,
         ptr: Union[str, SemanticPointerProtocol],
@@ -41,7 +65,7 @@ class FeedbackBus:
         **kwargs: Any,
     ) -> None:
         """
-        Present a message to the user.
+        Present a message to the user via the registered renderer.
 
         Args:
             ptr: Semantic Pointer to the message template (e.g. L.io.file_saved)
@@ -51,15 +75,7 @@ class FeedbackBus:
         if not self._renderer:
             return
 
-        template = self._get_template(ptr)
-
-        try:
-            message = template.format(**kwargs)
-        except KeyError as e:
-            message = f"<formatting error for '{ptr}': missing key {e}>"
-        except Exception as e:
-            message = f"<rendering error for '{ptr}': {e}>"
-
+        message = self.render_to_string(ptr, **kwargs)
         self._renderer.render(message, level=level, **kwargs)
 
     # Convenience shortcuts
