@@ -6,9 +6,14 @@ from .protocols import (
     PointerSetProtocol,
     OperatorProtocol,
 )
+from .events import GenericEventIR, EventProtocol
+from .presentation import RendererProtocol
 
 __all__ = [
     "SemanticPointerProtocol",
     "PointerSetProtocol",
     "OperatorProtocol",
+    "GenericEventIR",
+    "EventProtocol",
+    "RendererProtocol",
 ]
