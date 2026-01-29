@@ -38,37 +38,39 @@ class SemanticPointer(SemanticPointerProtocol):
         new_path = f"{self._path}.{suffix}" if self._path else suffix
         return SemanticPointer(new_path)
 
-    def __add__(self, other: Any) -> "SemanticPointer":
-        return self._join(other)
+    def _is_atomic(self, item: Any) -> bool:
+        return isinstance(
+            item, (str, bytes, SemanticPointerProtocol)
+        ) or not isinstance(item, Iterable)
 
-    def __truediv__(
-        self, other: Union[str, "SemanticPointerProtocol"]
-    ) -> "SemanticPointer":
-        return self._join(other)
+    def _recursive_flatten(self, item: Any) -> Iterable[Any]:
+        if self._is_atomic(item):
+            yield item
+        else:
+            for sub_item in item:
+                yield from self._recursive_flatten(sub_item)
 
-    def __getitem__(self, key: Any) -> Union["SemanticPointer", "PointerSetProtocol"]:
-        if isinstance(key, tuple):
-            # Rule: Multiple indices L['a', 'b'] return a PointerSet.
-            # Equivalent to self * key.
-            return self * key
+    def __mul__(self, other: Any) -> Union["SemanticPointer", "PointerSetProtocol"]:
+        # 1. Atomic Case
+        if self._is_atomic(other):
+            return self._join(str(other))
 
-        # Rule: Single index L['+'] returns a single SemanticPointer.
-        return self._join(str(key))
-
-    def __mul__(self, other: Any) -> "PointerSetProtocol":
-        # Lazy import via __init__.py's __getattr__ to break cycle
+        # 2. Container Case (requires expansion)
         from . import PointerSet
 
-        items_to_process: Iterable[Any]
+        # Flatten deeply nested structures like [[[1, 2]]] -> 1, 2
+        flat_items = list(self._recursive_flatten(other))
 
-        if isinstance(other, (str, SemanticPointer)):
-            # Rule 1: Treat str and SemanticPointer as atomic units
-            items_to_process = [other]
-        elif isinstance(other, Iterable):
-            # Rule 2: Treat other iterables as a collection of units
-            items_to_process = list(other)  # Consume iterators like dict_keys
-        else:
-            # Rule 3: Fallback for any other object (e.g., int)
-            items_to_process = [str(other)]
+        # Note: Even if the container has 1 item (L * [1]), we return a PointerSet
+        # to distinguish "User provided a list" vs "User provided an atom".
+        return PointerSet(self._join(str(item)) for item in flat_items)
 
-        return PointerSet(self / item for item in items_to_process)
+    # All other composition operators alias to __mul__
+    def __add__(self, other: Any) -> Union["SemanticPointer", "PointerSetProtocol"]:
+        return self * other
+
+    def __truediv__(self, other: Any) -> Union["SemanticPointer", "PointerSetProtocol"]:
+        return self * other
+
+    def __getitem__(self, key: Any) -> Union["SemanticPointer", "PointerSetProtocol"]:
+        return self * key
