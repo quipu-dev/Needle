@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "Capture: M feedback.py, M test_unified_bus.py", "type": "capture", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769707267.3223217, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[COMMIT] refactor(bus): 解构 FeedbackBus 与 MessageStore 的耦合", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769707280.4493928, "duration_ms": 0}}
