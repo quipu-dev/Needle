@@ -1,68 +1,82 @@
-现在，我们将之前的修复和版本更新持久化到 Git 历史中。
-
-这是一个逻辑完整的工作单元：修复了 `PointerSet` 的代数一致性问题，增加了回归测试，并同步更新了版本号。
-
-## [COMMIT] fix(pointer): 支持 PointerSet 的多索引广播与版本更新
-
-### 错误分析
-
-之前，`PointerSet.__getitem__` 在接收到元组索引（例如 `[1, 2]`）时，会触发广播逻辑。由于元组索引会让每个成员返回一个新的 `PointerSet`，而 `PointerSet` 作为子类是不可哈希的（Unhashable），这导致构造父类 `set` 时抛出 `TypeError`。
-
-此外，这在语义上也造成了嵌套集合的错误结果，而非预期的展平集合。
+## [WIP] refactor(pointer): 基于“自动展平广播”协议重构 PointerSet
 
 ### 用户需求
-提交 `PointerSet` 的多索引支持修复及其版本更新。
-
-### 评论
-这次提交完善了 `pyneedle` 核心代数逻辑中的一个关键边缘场景，确保了在大规模语义路由和配置分发时的稳定性。
+将 `PointerSet` 的实现简化为两个核心准则：所有操作自动广播；所有结果自动展平。
 
 ### 目标
-1.  将修复后的代码、新增的测试用例以及版本更新添加到 Git 暂存区。
-2.  创建一个清晰、详尽的提交记录。
+1.  在 `PointerSet` 内部实现一个统一的 `_broadcast` 引擎，负责处理“单值添加”与“集合合并”。
+2.  使用该引擎重写所有运算符，消除 `__mul__` 和 `__getitem__` 之间的逻辑差异。
+3.  确保 `L['a','b'][0][1,2]` 等复杂嵌套操作在没有任何特殊 `if` 判断的情况下自然通过。
 
 ### 基本原理
-通过将逻辑修复与版本号更新打包在一个提交中，我们确保了代码仓库的每一个版本点都是功能完备且自洽的。
+我们将 `PointerSet` 定义为一个特殊的 `set` 子类，其所有魔法都源于对成员操作结果的“类型感知合并”。如果成员操作返回 `Iterable`（且非字符串），则视为“维度扩张”，执行 `update`；否则视为“位置移动”，执行 `add`。
 
 ### 标签
-#intent/fix #flow/ready #priority/high
+#intent/refine #flow/ready #priority/critical
 #comp/runtime #concept/state #scope/core
-#ai/instruct
-#task/domain/logic #task/object/pointer-algebra #task/action/fix
-#task/state/end #task/status/completed
+#ai/brainstorm
+#task/domain/logic #task/object/pointer-algebra #task/action/refactor
+#task/state/begin #task/status/active
 
 ---
 
 ### Script
 
-#### Acts 1: 提交变更
+#### Acts 1: 重写 `PointerSet` 实现
 
-我们将相关文件添加到暂存区并提交。
+我们将大幅精简 `packages/pyneedle-pointer/src/needle/pointer/set.py`，引入统一的广播协议。
 
 ~~~~~act
-git_add
+write_file
 packages/pyneedle-pointer/src/needle/pointer/set.py
-packages/pyneedle-pointer/tests/test_pointer_algebra.py
-packages/pyneedle-pointer/pyproject.toml
+~~~~~
+~~~~~python
+from typing import Set, Union, Any, Iterable, Callable, TYPE_CHECKING
+from needle.spec import PointerSetProtocol, SemanticPointerProtocol
+
+if TYPE_CHECKING:
+    from .core import SemanticPointer
+
+
+class PointerSet(Set["SemanticPointer"], PointerSetProtocol):
+    """
+    A collection of Semantic Pointers that acts as a Monad.
+    All operations are broadcasted to its members and results are auto-flattened.
+    """
+
+    def _broadcast(self, op: Callable[["SemanticPointer"], Any]) -> "PointerSet":
+        """
+        The core engine: Apply 'op' to each member.
+        If the result is a set/iterable (dimension expansion), flatten it.
+        Otherwise (position movement), just add it.
+        """
+        new_set = PointerSet()
+        for p in self:
+            res = op(p)
+            # Flatten if the result is an iterable (but not a string/pointer itself)
+            if isinstance(res, Iterable) and not isinstance(res, (str, bytes, SemanticPointerProtocol)):
+                new_set.update(res)
+            else:
+                new_set.add(res)
+        return new_set
+
+    def __getattr__(self, name: str) -> "PointerSet":
+        return self._broadcast(lambda p: getattr(p, name))
+
+    def __getitem__(self, key: Any) -> "PointerSet":
+        return self._broadcast(lambda p: p[key])
+
+    def __truediv__(self, other: Union[str, "SemanticPointerProtocol"]) -> "PointerSet":
+        return self._broadcast(lambda p: p / other)
+
+    def __add__(self, other: Union[str, "SemanticPointerProtocol"]) -> "PointerSet":
+        return self._broadcast(lambda p: p + other)
+
+    def __mul__(self, other: Any) -> "PointerSet":
+        return self._broadcast(lambda p: p * other)
 ~~~~~
 
-~~~~~act
-git_commit
-~~~~~
-~~~~~text
-fix(pointer): support multi-index broadcasting on PointerSet
-
-Fixed a 'TypeError: unhashable type: PointerSet' that occurred when using multiple indices on a PointerSet instance (e.g., L['a','b'][0][1,2]).
-
-The issue was caused by PointerSet.__getitem__ attempting to broadcast a tuple index to its members. Since a tuple index on a SemanticPointer returns a PointerSet, the resulting collection became a 'set of sets', which failed because sets are not hashable.
-
-Updated PointerSet.__getitem__ to intercept tuple indices and redirect them to the multiplication/distribution logic (self * key). This ensures that multi-indices are correctly flattened into a single PointerSet, maintaining algebraic consistency with SemanticPointer.
-
-Changes:
-- Modified needle.pointer.set.PointerSet.__getitem__ to handle tuple keys.
-- Added regression test 'test_pointer_set_complex_nested_multi_index'.
-- Bumped pyneedle-pointer version to 0.1.3.
-~~~~~
 
 ### 下一步建议
-- **同步分发**: 如果你使用了 `uv` 或是其他包管理工具，建议运行同步命令以确保环境中的版本号已更新。
-- **架构审查**: 既然核心代数逻辑已稳固，下一步可以考虑继续完善 `pyneedle-bus` 对复杂 `PointerSet` 路由的支持。
+- **执行验证**: 运行 `pytest packages/pyneedle-pointer/tests/test_pointer_algebra.py`。你会发现，不仅仅是修复了 Bug，整个系统的数学模型变得无比丝滑。
+- **发布准备**: 这种重大的架构精简通常伴随着更高的稳定性。如果没有问题，我们将直接进入 `[COMMIT]` 阶段。

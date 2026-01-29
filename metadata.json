@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "[COMMIT] fix(pointer): 支持 PointerSet 的多索引广播与版本更新", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769713227.615651, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[WIP] refactor(pointer): 基于“自动展平广播”协议重构 PointerSet", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769713643.1401808, "duration_ms": 0}}
