@@ -101,22 +101,31 @@ print(f"Non-existent Key: {non_existent}")
 
 ### Pointer Algebra
 
-Create sets of pointers for powerful, expressive operations.
+Create sets of pointers for powerful, expressive operations. PyNeedle supports fluent broadcasting and multi-indexing.
 
 ```python
-from needle import L, PointerSet
+from needle import L
 
-# Define a set of base pointers
-user_fields = PointerSet([L.user.name, L.user.email])
+# 1. Multi-indexing shortcut
+# Create a PointerSet effortlessly
+user_fields = L.user['name', 'email']
+# Result: PointerSet({L.user.name, L.user.email})
 
-# Broadcast a suffix across the set
-form_labels = user_fields / "label"
+# 2. Attribute & Index Broadcasting
+# Broadcast a suffix or index across the entire set fluently
+form_labels = user_fields.label
 # Result: PointerSet({L.user.name.label, L.user.email.label})
 
-# Use multiplication for cartesian-product-like expansion
+# 3. Cartesian Product Expansion
+# Use multiplication to expand a pointer into a set
 actions = {"read", "write"}
 permissions = L.auth.user * actions
 # Result: PointerSet({L.auth.user.read, L.auth.user.write})
+
+# 4. Advanced Chaining
+# Combine everything for powerful resource addressing
+errors = L.api['v1', 'v2'][404].message
+# Result: PointerSet({L.api.v1[404].message, L.api.v2[404].message})
 ```
 
 ### File-Based Loading
