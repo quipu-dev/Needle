@@ -1,4 +1,4 @@
-from typing import Set, Union, Any, Iterable, Callable, TYPE_CHECKING
+from typing import Set, Union, Any, Iterable, Callable, TYPE_CHECKING, cast
 from needle.spec import PointerSetProtocol, SemanticPointerProtocol
 
 if TYPE_CHECKING:
@@ -14,9 +14,12 @@ class PointerSet(Set["SemanticPointer"], PointerSetProtocol):
             if isinstance(res, Iterable) and not isinstance(
                 res, (str, bytes, SemanticPointerProtocol)
             ):
-                new_set.update(res)
+                # We assume the iterable contains SemanticPointers based on our algebra rules
+                new_set.update(cast(Iterable["SemanticPointer"], res))
             else:
-                new_set.add(res)
+                # We assume the atomic result is a SemanticPointer
+                # (since L * atom -> L, L + atom -> L, etc.)
+                new_set.add(cast("SemanticPointer", res))
         return new_set
 
     def __getattr__(self, name: str) -> "PointerSet":
