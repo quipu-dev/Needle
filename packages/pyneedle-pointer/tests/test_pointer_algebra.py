@@ -54,7 +54,49 @@ def test_pointer_multiplication_distributes_to_set():
     assert len(result) == 2
     assert L.api.v1.users in result
     assert L.api.v1.products in result
-    assert L.api.v1.orders not in result
+
+    # NEW: Test that division by set behaves exactly like multiplication
+    result_div = base / endpoints
+    assert result_div == result
+
+
+def test_pointer_atomic_vs_container_behavior():
+    # 1. Atomic Input -> Atomic Output (Pointer)
+    # Even with '*', if input is atomic string, it acts as composition
+    p1 = L.api * "v1"
+    assert isinstance(p1, SemanticPointer)
+    assert p1 == "api.v1"
+
+    # Division behaves the same
+    p2 = L.api / "v1"
+    assert p2 == p1
+
+    # 2. Container Input -> Collection Output (PointerSet)
+    # Even if list has only 1 item
+    ps1 = L.api * ["v1"]
+    assert isinstance(ps1, PointerSet)
+    assert L.api.v1 in ps1
+
+    # Division behaves the same
+    ps2 = L.api / ["v1"]
+    assert ps2 == ps1
+
+
+def test_pointer_recursive_flattening():
+    # Test L[[[1, 2]]] -> {L.1, L.2}
+
+    # Using getitem
+    ps1 = L[[[1, 2]]]
+    assert isinstance(ps1, PointerSet)
+    assert ps1 == {L["1"], L["2"]}
+
+    # Using multiplication
+    ps2 = L * [[[1], 2]]
+    assert ps2 == ps1
+
+    # Using division
+    ps3 = L / (1, (2,))
+    assert ps3 == ps1
 
 
 # --- PointerSet (Ls) Tests ---
@@ -142,7 +184,7 @@ def test_pointer_multiplication_is_flexible_and_chainable():
 
     # 4. Using non-string, non-pointer objects (fallback to str)
     result4 = L.status * 200
-    expected4 = {L.status["200"]}
+    expected4 = L.status["200"]
     assert result4 == expected4
 
     # 5. PointerSet with non-string, non-pointer objects

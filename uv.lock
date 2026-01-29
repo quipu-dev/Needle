@@ -312,7 +312,7 @@ wheels = [
 
 [[package]]
 name = "pyneedle"
-version = "0.1.5"
+version = "0.1.6"
 source = { editable = "packages/pyneedle" }
 dependencies = [
     { name = "pyneedle-bus" },
@@ -331,7 +331,7 @@ requires-dist = [
 
 [[package]]
 name = "pyneedle-bus"
-version = "0.1.3"
+version = "0.1.4"
 source = { editable = "packages/pyneedle-bus" }
 dependencies = [
     { name = "pyneedle-pointer" },
@@ -386,7 +386,7 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "pyneedle-pointer"
-version = "0.1.4"
+version = "0.2.0"
 source = { editable = "packages/pyneedle-pointer" }
 dependencies = [
     { name = "pyneedle-spec" },
@@ -397,7 +397,7 @@ requires-dist = [{ name = "pyneedle-spec", editable = "packages/pyneedle-spec" }
 
 [[package]]
 name = "pyneedle-runtime"
-version = "0.1.3"
+version = "0.1.4"
 source = { editable = "packages/pyneedle-runtime" }
 dependencies = [
     { name = "pyneedle-pointer" },
@@ -412,7 +412,7 @@ requires-dist = [
 
 [[package]]
 name = "pyneedle-spec"
-version = "0.1.3"
+version = "0.1.4"
 source = { editable = "packages/pyneedle-spec" }
 
 [[package]]
