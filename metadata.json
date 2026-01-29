@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "[WIP] test(bus): 更新统一总线测试以适配 Operator 注入架构", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769706913.6232374, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[WIP] chore(bus): 提升 pyneedle-bus 版本号至 0.1.1", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769707001.8530395, "duration_ms": 0}}
