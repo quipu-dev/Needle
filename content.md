@@ -1,235 +1,201 @@
-分析完全正确。目前的 `MessageStore` 实际上是一个“伪装成存储的配置组装器”，它把“如何检测语言”、“如何定位文件”以及“如何构建 Overlay”这些**业务策略**硬编码进了 `pyneedle-bus` 这个本应纯粹的**通信基础设施**中。
+由于 `MessageStore` 已被移除，我们必须更新测试用例，使其遵循新的“显式组装”模式。在测试中，我们将手动实例化 `I18NFactoryOperator` 和 `OverlayOperator` 并注入到 `FeedbackBus` 中。
 
-这违反了“关注点分离”原则：
-1.  **Bus** 应该只关心：我有消息（Pointer），我有渲染器（Renderer），我需要一个黑盒（Operator）帮我把消息转换成模板。
-2.  **Runtime** 应该提供构建这个黑盒的零件（I18NFactory, Overlay）。
-3.  **Application (Stitcher)** 应该决定如何组装这些零件。
+这实际上让测试变得更清晰了，因为它展示了如何在没有硬编码存储逻辑的情况下，通过组合不同的 `Operator` 来实现相同的 I18n 功能。
 
-我将执行第一步：净化 `pyneedle-bus`。
-
-## [WIP] refactor(bus): 从 FeedbackBus 中解构并删除 MessageStore
+## [WIP] test(bus): 更新统一总线测试以适配 Operator 注入架构
 
 ### 用户需求
-移除 `pyneedle-bus` 中对 `MessageStore` 的硬编码依赖。使 `FeedbackBus` 成为一个纯粹的、接受 `OperatorProtocol` 注入的展示总线，从而实现“策略（如何加载资源）”与“机制（如何分发和渲染消息）”的彻底解耦。
+修复因 `MessageStore` 被删除而导致的 `pyneedle-bus` 测试失败。
 
 ### 评论
-这是迈向“本体论正确性”的关键一步。通过将 `FeedbackBus` 泛化为仅依赖 `OperatorProtocol` 的组件，我们不仅消除了 Bus 对文件系统的隐式依赖，还极大地增强了系统的灵活性——现在我们可以轻易地注入一个基于内存、数据库甚至远程 API 的 Operator，而无需修改总线代码。
+这次重构虽然增加了测试代码的行数（因为我们需要手动组装 Operator），但它验证了 `FeedbackBus` 的核心接口已经变得足够通用。我们现在是在测试“组装好的总线”如何工作，而不是测试总线内部那个黑盒存储。
 
 ### 目标
-1.  **删除** `packages/pyneedle-bus/src/needle/bus/store.py`。
-2.  **重构** `FeedbackBus`：
-    *   移除 `MessageStore` 依赖。
-    *   增加 `set_operator` 方法用于延迟注入。
-    *   简化模板获取逻辑，直接通过 `self._operator(ptr)` 获取。
-3.  **更新** `pyneedle-bus` 入口：
-    *   不再导出 `MessageStore` 或 `message_store`。
-    *   初始化一个空的 `bus` 单例。
-
-### 基本原理
-根据 **HFEA v1.0** 的“严格分层与边界”公理，Bus 属于“执行（Action）”层，而 Operator 的组装属于“意图（Intent）”层。通过依赖倒置（Dependency Inversion），让 `FeedbackBus` 依赖于 `OperatorProtocol` 这一抽象接口，而不是具体的资源加载逻辑。
+1.  **修改** `packages/pyneedle-bus/tests/test_unified_bus.py`：
+    *   移除 `MessageStore` 导入。
+    *   从 `needle.operators` 导入所需的 `I18NFactoryOperator` 和 `OverlayOperator`。
+    *   更新 `test_unified_bus_integration`，手动创建并注入 `Operator` 链。
+    *   由于 `FeedbackBus` 不再自动响应 `monkeypatch` 的环境变量（因为它不再持有检测逻辑），测试中需要手动切换 Operator 以验证不同语言的渲染。
 
 ### 标签
 #intent/refine #flow/ready #priority/high
-#comp/bus #concept/executor #scope/core
-#ai/brainstorm
-#task/domain/bus
-#task/object/feedback-bus
-#task/action/refactor
-#task/state/begin
+#comp/bus #comp/tests #scope/core
+#task/domain/testing
+#task/object/bus-tests
+#task/action/update
+#task/state/continue
 
 ---
 
 ### Script
 
-#### Acts 1: 删除 MessageStore 及其导出
+#### Acts 1: 更新测试用例
 
-由于 `MessageStore` 已经确定是设计过度且位置错误的组件，我们将其彻底从 `pyneedle-bus` 中移除。
-
-~~~~~act
-delete_file
-packages/pyneedle-bus/src/needle/bus/store.py
-~~~~~
-
-~~~~~act
-patch_file
-packages/pyneedle-bus/src/needle/bus/__init__.py
-~~~~~
-~~~~~python.old
-from .event import EventBus, EventHandler
-from .feedback import FeedbackBus
-from .store import MessageStore
-from .bridge import LogBridge
-
-__all__ = [
-    "EventBus",
-    "EventHandler",
-    "FeedbackBus",
-    "MessageStore",
-    "LogBridge",
-    "bus",  # The default FeedbackBus singleton
-    "event_bus",  # The default EventBus singleton
-    "message_store",  # The default Store
-]
-
-# --- Default Singleton Instances ---
-# For simple apps (like CLI tools), a global singleton is often sufficient.
-# Complex apps (like Cascade Engine) may instantiate their own buses.
-
-message_store = MessageStore()
-
-# Note: Renderer is not set by default.
-# The application entry point (CLI/Main) must call `bus.set_renderer(...)`
-bus = FeedbackBus(store=message_store)
-
-event_bus = EventBus()
-~~~~~
-~~~~~python.new
-from .event import EventBus, EventHandler
-from .feedback import FeedbackBus
-from .bridge import LogBridge
-
-__all__ = [
-    "EventBus",
-    "EventHandler",
-    "FeedbackBus",
-    "LogBridge",
-    "bus",  # The default FeedbackBus singleton
-    "event_bus",  # The default EventBus singleton
-]
-
-# --- Default Singleton Instances ---
-# For simple apps (like CLI tools), a global singleton is often sufficient.
-# Complex apps (like Cascade Engine) may instantiate their own buses.
-
-# Note: Renderer and Operator are not set by default.
-# The application entry point (CLI/Main) must call:
-# - `bus.set_renderer(...)`
-# - `bus.set_operator(...)`
-bus = FeedbackBus()
-
-event_bus = EventBus()
-~~~~~
-
-#### Acts 2: 重构 FeedbackBus 以支持 Operator 注入
-
-修改 `FeedbackBus`，使其不再通过 `MessageStore` 自动处理语言和加载，而是直接使用注入的 `operator`。
+我们将重写集成测试。由于我们追求“高保真”，测试将模拟应用启动时的真实行为：扫描路径、创建工厂、组合层叠。
 
 ~~~~~act
 write_file
-packages/pyneedle-bus/src/needle/bus/feedback.py
+packages/pyneedle-bus/tests/test_unified_bus.py
 ~~~~~
 ~~~~~python
-from typing import Any, Optional, Union
+import json
+from pathlib import Path
+from typing import List, Dict, Any, Tuple
 
-from needle.spec import SemanticPointerProtocol, RendererProtocol, OperatorProtocol
+import pytest
+from needle.pointer import L
+from needle.spec import RendererProtocol
+
+# From bus
+from needle.bus import (
+    EventBus,
+    FeedbackBus,
+    LogBridge,
+)
+
+# From runtime/operators (integration test)
+from needle.operators import I18NFactoryOperator, OverlayOperator
 
 
-class FeedbackBus:
+# --- Fixtures ---
+
+
+class SpyRenderer(RendererProtocol):
+    """A mock renderer that captures calls instead of printing."""
+
+    def __init__(self):
+        self.calls: List[Tuple[str, str, Dict[str, Any]]] = []
+
+    def render(self, message: str, level: str = "info", **kwargs: Any) -> None:
+        self.calls.append((message, level, kwargs))
+
+    def get_last_message(self) -> str:
+        return self.calls[-1][0] if self.calls else ""
+
+    def clear(self):
+        self.calls.clear()
+
+
+@pytest.fixture
+def mock_asset_structure(tmp_path: Path) -> Dict[str, Path]:
+    """Creates a mock filesystem structure for testing i18n overlays."""
+    # 1. Core App Assets (Low Priority)
+    app_root = tmp_path / "app_assets"
+    app_en_dir = app_root / "needle" / "en"
+    app_zh_dir = app_root / "needle" / "zh"
+    app_en_dir.mkdir(parents=True)
+    app_zh_dir.mkdir(parents=True)
+
+    app_en_data = {
+        "welcome": "Welcome to CoreApp!",
+        "setup": "Initializing system...",
+    }
+    app_zh_data = {
+        "welcome": "欢迎使用核心应用！",
+        "setup": "正在初始化系统...",
+    }
+    (app_en_dir / "app.json").write_text(json.dumps(app_en_data))
+    (app_zh_dir / "app.json").write_text(json.dumps(app_zh_data, ensure_ascii=False))
+
+    # 2. Plugin Assets (High Priority)
+    plugin_root = tmp_path / "plugin_assets"
+    plugin_en_dir = plugin_root / "needle" / "en"
+    plugin_zh_dir = plugin_root / "needle" / "zh"
+    plugin_en_dir.mkdir(parents=True)
+    plugin_zh_dir.mkdir(parents=True)
+
+    plugin_en_data = {
+        "welcome": "Welcome from MyPlugin!",  # Override
+        "farewell": "Goodbye from Plugin!",  # New
+    }
+    plugin_zh_data = {
+        "welcome": "MyPlugin 欢迎您！",
+        "farewell": "插件再见！",
+    }
+    (plugin_en_dir / "app.json").write_text(json.dumps(plugin_en_data))
+    (plugin_zh_dir / "app.json").write_text(
+        json.dumps(plugin_zh_data, ensure_ascii=False)
+    )
+
+    return {"app": app_root, "plugin": plugin_root}
+
+
+# --- Test Cases ---
+
+
+def test_unified_bus_integration(mock_asset_structure):
     """
-    The output channel for the application.
-    It relies on an injected Operator to resolve Pointers to Templates.
+    End-to-end test for the entire pyneedle-bus stack with manually assembled operators.
     """
+    # 1. ARRANGE
+    event_bus = EventBus()
+    spy_renderer = SpyRenderer()
+    feedback_bus = FeedbackBus(renderer=spy_renderer)
+    bridge = LogBridge(event_bus, feedback_bus)
 
-    def __init__(
-        self,
-        operator: Optional[OperatorProtocol] = None,
-        renderer: Optional[RendererProtocol] = None,
-    ):
-        self._operator = operator
-        self._renderer = renderer
+    # Manual Operator Assembly
+    # Later roots override earlier ones? OverlayOperator uses first-match-wins.
+    # So we put [Plugin, App] to let Plugin override App.
+    app_factory = I18NFactoryOperator(mock_asset_structure["app"])
+    plugin_factory = I18NFactoryOperator(mock_asset_structure["plugin"])
 
-    def set_renderer(self, renderer: RendererProtocol) -> None:
-        self._renderer = renderer
+    def set_language(lang: str):
+        # Build a specific overlay for the target language
+        # plugin_factory(lang) returns a FileSystemOperator for that dir
+        overlay = OverlayOperator([plugin_factory(lang), app_factory(lang)])
+        feedback_bus.set_operator(overlay)
 
-    def set_operator(self, operator: OperatorProtocol) -> None:
-        """Inject the Operator (Nexus) responsible for resolving pointers."""
-        self._operator = operator
+    # Connect the bridge
+    bridge.connect(L.app.farewell, level="success")
 
-    def _get_template(self, ptr: Union[str, SemanticPointerProtocol]) -> str:
-        # 1. Fallback if no operator is set
-        if not self._operator:
-            return str(ptr)
+    # 2. ACT & ASSERT: FeedbackBus direct rendering
 
-        # 2. Lookup template from the operator
-        template = self._operator(ptr)
+    # Test English
+    set_language("en")
+    feedback_bus.info(L.app.welcome)
+    assert spy_renderer.get_last_message() == "Welcome from MyPlugin!"
 
-        # 3. Fallback: If not found, stringify the pointer itself
-        if template is None:
-            return str(ptr)
+    # Test English - Fallback (found in App but not in Plugin)
+    feedback_bus.info(L.app.setup)
+    assert spy_renderer.get_last_message() == "Initializing system..."
 
-        return str(template)
+    spy_renderer.clear()
 
-    def render_to_string(
-        self,
-        ptr: Union[str, SemanticPointerProtocol],
-        **kwargs: Any,
-    ) -> str:
-        """
-        Resolve a template and format it into a string without rendering.
+    # Test Chinese
+    set_language("zh")
+    feedback_bus.warning(L.app.welcome)
+    assert spy_renderer.get_last_message() == "MyPlugin 欢迎您！"
+    assert spy_renderer.calls[-1][1] == "warning"
 
-        Args:
-            ptr: Semantic Pointer or string ID of the template.
-            **kwargs: Arguments for template formatting.
+    spy_renderer.clear()
 
-        Returns:
-            The fully formatted message string.
-        """
-        template = self._get_template(ptr)
+    # 3. ACT & ASSERT: EventBus -> Bridge -> FeedbackBus
+    set_language("en")
 
-        try:
-            return template.format(**kwargs)
-        except KeyError as e:
-            return f"<formatting error for '{ptr}': missing key {e}>"
-        except Exception as e:
-            return f"<rendering error for '{ptr}': {e}>"
+    # Publish an event
+    class UserLogoutEvent:
+        def __init__(self, username):
+            self.username = username
+            self.topic = L.app.farewell
 
-    def present(
-        self,
-        ptr: Union[str, SemanticPointerProtocol],
-        level: str = "info",
-        **kwargs: Any,
-    ) -> None:
-        """
-        Present a message to the user via the registered renderer.
+    event_bus.publish(UserLogoutEvent(username="Alice"))
 
-        Args:
-            ptr: Semantic Pointer to the message template (e.g. L.io.file_saved)
-            level: 'info', 'success', 'warning', 'error', 'debug'
-            **kwargs: Arguments for template formatting
-        """
-        if not self._renderer:
-            return
-
-        message = self.render_to_string(ptr, **kwargs)
-        self._renderer.render(message, level=level, **kwargs)
-
-    # Convenience shortcuts
-
-    def info(self, ptr: Union[str, SemanticPointerProtocol], **kwargs: Any) -> None:
-        self.present(ptr, level="info", **kwargs)
-
-    def success(self, ptr: Union[str, SemanticPointerProtocol], **kwargs: Any) -> None:
-        self.present(ptr, level="success", **kwargs)
-
-    def warning(self, ptr: Union[str, SemanticPointerProtocol], **kwargs: Any) -> None:
-        self.present(ptr, level="warning", **kwargs)
-
-    def error(self, ptr: Union[str, SemanticPointerProtocol], **kwargs: Any) -> None:
-        self.present(ptr, level="error", **kwargs)
-
-    def debug(self, ptr: Union[str, SemanticPointerProtocol], **kwargs: Any) -> None:
-        self.present(ptr, level="debug", **kwargs)
+    assert len(spy_renderer.calls) == 1
+    assert spy_renderer.get_last_message() == "Goodbye from Plugin!"
+    assert spy_renderer.calls[0][1] == "success"
 ~~~~~
 
 ### 下一步建议
 
-我们已经完成了 `pyneedle-bus` 的“净化”。现在，这个总线非常轻量，它仅仅是一个消息中转站，等待着外部注入 Renderer 和 Operator。
+`pyneedle-bus` 的测试现在应该能通过了。我们已经证明了通过注入外部 Operator，`FeedbackBus` 依然能完美支持 I18n 和层叠覆盖逻辑。
 
-**下一步的任务焦点将转移到 `stitcher-common`**：
-我们需要修改 `packages/stitcher-common/src/stitcher/common/bus.py`。目前的版本还试图调用 `message_store.register_asset_root`，这会报错。我们需要在那里：
-1.  **手动检测语言**（使用原 `MessageStore` 中的静态逻辑或通过环境变量）。
-2.  **实例化 `I18NFactoryOperator`**。
-3.  **构建 `OverlayOperator`**（将 Stitcher 自身的 Assets 与全局的默认 Operator 层叠）。
-4.  **将组装好的 Operator 注入 `bus.set_operator(...)`**。
+现在，球回到了 **Stitcher** 这边。由于 `pyneedle-bus` 已经不再提供默认的 `MessageStore` 和自动加载功能，`stitcher-common` 必须承担起这个责任。
 
-如果你准备好了，请指示我开始重构 Stitcher 的组装逻辑。
+**下一个任务**：
+重构 `packages/stitcher-common/src/stitcher/common/bus.py`，使其包含以下逻辑：
+1.  **检测语言**（实现原来的 `MessageStore.detect_lang`）。
+2.  **定位资产**。
+3.  **组装 `stitcher_operator` (Nexus)**。
+4.  **注入全局 `bus` 单例**。
+
+如果你同意，我们将开始处理 Stitcher 的副作用修复。
