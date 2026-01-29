@@ -1,62 +1,87 @@
-这是一个非常深刻且符合 Python 惯例（Pythonic）的改进。
+好的，我们将为这一“魔法”语法补充完整的单元测试。
 
-在 Python 中，`obj[a, b]` 语法会自然地将参数封装为 `tuple` 传递给 `__getitem__`。利用这一特性来区分 **“模式/路径构造（单数）”** 与 **“集合快捷创建（复数）”**，不仅消除了 `L * ['a', 'b']` 这种略显生硬的乘法语法在特定场景下的违和感，还为 `+` 和 `#` 通配符的引入提供了极佳的语义载体。
+这次测试将覆盖两个核心场景：
+1. **多重索引 (Multi-index)**：验证 `L['a', 'b']` 是否正确触发了集合创建，并支持后续的广播操作（如 `.users`）。
+2. **模式构造 (Wildcard/Single index)**：验证 `L['+']` 和 `L['#']` 是否保持为单体指针，以便用于总线模式匹配。
 
-`L['+']` 作为一个单体指针（模式），在总线订阅时代表一个“位置标记”；而 `L['a', 'b']` 作为一个集合，代表一组明确的实体。这种区分非常优雅。
-
-我将按照你的构思增强 `pyneedle-pointer` 的核心实现。
-
-## [WIP] feat(pointer): 增强 SemanticPointer 的索引操作以支持多重索引和集合创建
+## [WIP] test(pointer): 增加多重索引与通配符索引的单元测试
 
 ### 用户需求
-增强 `SemanticPointer` 的 `__getitem__` 实现：
-1. **单值索引**: `L['+']` 保持返回单体 `SemanticPointer`，用于构造通配符模式。
-2. **多值索引**: `L['a', 'b']` 自动返回 `PointerSet`（效果等同于 `L * ['a', 'b']`），提供集合创建的快捷语法。
+验证 `SemanticPointer` 的新索引行为：
+- `L['a', 'b']` 应返回 `PointerSet`。
+- `L['+']` 应返回 `SemanticPointer`。
+- 确保这些新语法与现有的广播和链式调用完美兼容。
 
 ### 评论
-这是一个典型的“魔法”服务于“直觉”的案例。通过识别 `__getitem__` 中的 `tuple` 类型，我们完美解决了单体路径拼接与批量操作的语法冲突。这让 `PyNeedle` 的 DSL（领域特定语言）表现力更进一步。
+通过测试验证这种“多态”返回值（根据参数个数返回不同类型）是非常必要的，这能确保 IDE 插件或类型检查工具（在运行期）能观察到预期的行为，并防止语法冲突。
 
 ### 目标
-1. 修改 `packages/pyneedle-pointer/src/needle/pointer/core.py` 中的 `__getitem__` 方法。
-2. 实现基于类型的分发逻辑：`tuple` -> `PointerSet`, `Any` -> `SemanticPointer`。
+1. 确保 `packages/pyneedle-pointer/src/needle/pointer/core.py` 的逻辑已更新。
+2. 在 `packages/pyneedle-pointer/tests/test_pointer_algebra.py` 中增加新的测试函数。
 
 ### 基本原理
-利用 Python `__getitem__` 处理多参数时的原生特性。当检测到 `key` 为 `tuple` 时，直接复用已有的 `__mul__` 逻辑，因为 `__mul__` 已经能够完美处理 `Iterable` 并返回 `PointerSet`。对于非元组键，则继续执行传统的路径拼接。
+我们在现有的代数测试文件中增加两个独立的测试用例：`test_pointer_getitem_multi_index` 和 `test_pointer_wildcard_indexing`。这将利用现有的 `pytest` 环境验证逻辑的正确性。
 
 ### 标签
-#intent/refine #flow/ready #priority/medium
-#comp/pointer #concept/navigation #scope/ux #scope/dx
+#intent/tooling #flow/ready #priority/medium
+#comp/tests #concept/navigation #scope/dx
 #ai/instruct
-#task/domain/pointer #task/object/semantic-pointer #task/action/refactor
-#task/state/begin
+#task/domain/pointer #task/object/semantic-pointer #task/action/testing
+#task/state/continue
 
 ---
 
 ### Script
 
-#### Acts 1: 修改 `SemanticPointer` 的 `__getitem__` 实现
+#### Acts 1: 在测试文件中增加索引增强的验证逻辑
 
-我们将 `__getitem__` 的签名从限制 `Union[str, int]` 放宽到 `Any`，并增加对 `tuple` 的特殊处理。
+我们将新的测试用例追加到 `test_pointer_algebra.py` 的末尾。
 
 ~~~~~act
 patch_file
-packages/pyneedle-pointer/src/needle/pointer/core.py
+packages/pyneedle-pointer/tests/test_pointer_algebra.py
 ~~~~~
 ~~~~~python.old
-    def __getitem__(self, key: Union[str, int]) -> "SemanticPointer":
-        return self._join(str(key))
+    result5 = (L * {"http", "ftp"}) * 404
+    expected5 = {L.http["404"], L.ftp["404"]}
+    assert result5 == expected5
 ~~~~~
 ~~~~~python.new
-    def __getitem__(self, key: Any) -> Union["SemanticPointer", "PointerSetProtocol"]:
-        if isinstance(key, tuple):
-            # Rule: Multiple indices L['a', 'b'] return a PointerSet.
-            # Equivalent to self * key.
-            return self * key
+    result5 = (L * {"http", "ftp"}) * 404
+    expected5 = {L.http["404"], L.ftp["404"]}
+    assert result5 == expected5
 
-        # Rule: Single index L['+'] returns a single SemanticPointer.
-        return self._join(str(key))
+
+def test_pointer_getitem_multi_index():
+    # Multi-index L['a', 'b'] should return a PointerSet
+    ps = L["a", "b"]
+    assert isinstance(ps, PointerSet)
+    assert len(ps) == 2
+    assert L.a in ps
+    assert L.b in ps
+
+    # Chaining with multi-index: L.api['v1', 'v2'].users
+    # This proves broadcasting works after the shortcut creation.
+    ps2 = L.api["v1", "v2"].users
+    assert ps2 == {L.api.v1.users, L.api.v2.users}
+
+
+def test_pointer_wildcard_indexing():
+    # Single index L['+'] should return a single SemanticPointer (Pattern)
+    p1 = L["+"]
+    assert isinstance(p1, SemanticPointer)
+    assert str(p1) == "+"
+
+    # MQTT style wildcard construction
+    p2 = L.check["#"]
+    assert isinstance(p2, SemanticPointer)
+    assert str(p2) == "check.#"
+
+    # Chaining after wildcard
+    p3 = L.check["+"] / "error"
+    assert str(p3) == "check.+.error"
 ~~~~~
 
 ### 下一步建议
-- **单元测试**: 建议立即运行或编写测试，验证 `L['a', 'b']` 是否真的返回了 `PointerSet` 类型，以及 `L['+']` 的路径是否正确。
-- **通配符支持**: 既然语法层已经支持了 `L['+']`，接下来可以考虑在 `pyneedle-bus` 中实现对应的通配符匹配逻辑（如你提到的 MQTT 风格匹配器），让这个“模式指针”真正发挥作用。
+- **运行测试**: 请运行 `pytest packages/pyneedle-pointer/tests/test_pointer_algebra.py` 以确保所有断言通过。
+- **总线集成**: 测试通过后，我们就可以在 `pyneedle-bus` 中放心使用 `L['+']` 来作为订阅模式了。你准备好开始重构 `Bus` 的匹配逻辑了吗？
