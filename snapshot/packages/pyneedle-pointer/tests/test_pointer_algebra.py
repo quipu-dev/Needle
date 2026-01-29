@@ -1,4 +1,5 @@
 from needle.pointer import L, SemanticPointer, PointerSet
+from typing import Union
 
 
 # --- SemanticPointer (L) Tests ---
