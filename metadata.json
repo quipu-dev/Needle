@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "[WIP] chore(version): 提升所有相关包的版本号并同步依赖约束", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769710960.3929756, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "Capture: M protocols.py, M uv.lock", "type": "capture", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769711096.2653668, "duration_ms": 0}}
