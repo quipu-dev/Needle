@@ -179,3 +179,13 @@ def test_pointer_wildcard_indexing():
     # Chaining after wildcard
     p3 = L.check["+"] / "error"
     assert str(p3) == "check.+.error"
+
+
+def test_pointer_set_getitem_broadcasting():
+    # Test broadcasting of __getitem__ on a PointerSet
+    ps = L["auth", "api"][0]
+    assert ps == {L.auth[0], L.api[0]}
+
+    # Combined complex chaining
+    ps2 = L["http", "ftp"].v1[404].detail
+    assert ps2 == {L.http.v1[404].detail, L.ftp.v1[404].detail}

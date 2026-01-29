@@ -11,6 +11,11 @@ class PointerSet(Set["SemanticPointer"], PointerSetProtocol):
         # This allows L.api["v1", "v2"].users syntax.
         return self / name
 
+    def __getitem__(self, key: Any) -> "PointerSet":
+        # Broadcast indexing to all pointers in the set.
+        # This allows L["a", "b"][0] -> {L.a[0], L.b[0]}
+        return PointerSet(p[key] for p in self)
+
     def __truediv__(self, other: Union[str, "SemanticPointerProtocol"]) -> "PointerSet":
         # We assume elements are SemanticPointers which support __truediv__
         return PointerSet(p / other for p in self)
