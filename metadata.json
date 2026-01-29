@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "[COMMIT] docs(cli): 更新 README 以展示多重索引与广播语法", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769711502.92685, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[WIP] fix(pointer): 支持 PointerSet 的多索引广播与嵌套组合", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769713090.979472, "duration_ms": 0}}

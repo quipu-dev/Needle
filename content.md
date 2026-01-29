@@ -1,170 +1,105 @@
-好的，我们将更新 `pyneedle` 的中英文文档，将这次令人兴奋的“多重索引”和“广播机制”补充进去。这不仅能让文档更现代化，也能让新用户一眼看到 `PyNeedle` 在处理复杂资源时的优雅。
+你的分析非常精准。问题的核心在于 `PointerSet.__getitem__` 缺乏对多索引（元组）的特殊处理，导致它尝试将广播操作产生的多个 `PointerSet` 对象作为元素放入一个新的集合中。由于集合（Set）是不可哈希的，这便触发了 `TypeError`。
 
-## [COMMIT] docs(cli): 更新 README 以展示多重索引与广播语法
+为了保持代数一致性，`PointerSet` 应当镜像 `SemanticPointer` 的行为：当遇到元组索引时，将其视为一次分布式的乘法（Multiplication/Distribution）操作。
+
+我将生成一个计划来修复此问题，并增加相关的测试用例。
+
+## [WIP] fix(pointer): 支持 PointerSet 的多索引广播与嵌套组合
+
+### 错误分析
+
+在 `pyneedle-pointer` 中，`PointerSet.__getitem__` 的实现过于简单，它无差别地对集合内的每个 `SemanticPointer` 执行 `p[key]`。
+
+1.  当 `key` 是一个元组（如 `[1, 2]`）时，根据 `SemanticPointer` 的协议，`p[1, 2]` 会返回一个新的 `PointerSet({p.1, p.2})`。
+2.  `PointerSet` 的构造器尝试将这些返回的 `PointerSet` 对象添加进自身。
+3.  由于 `PointerSet` 继承自原生 `set`，它要求所有元素必须是可哈希的（Hashable），而 `set` 本身是不可哈希的，导致了 `TypeError: unhashable type: 'PointerSet'`。
+
+**解决方案**：
+修改 `PointerSet.__getitem__`，使其在接收到元组时调用 `self * key`。由于 `PointerSet.__mul__` 已经实现了正确的展平（Flatten）和笛卡尔积逻辑，这将自动完成多索引的广播。
 
 ### 用户需求
-在 `pyneedle` 的 `README.md` 和 `README.zh.md` 中展示最新的指针代数特性：
-1. 使用 `L['a', 'b']` 快捷创建集合。
-2. 展示 `PointerSet` 的点号（`.`）和索引（`[]`）广播能力。
+支持形如 `L['a', 'b'][0][1, 2]` 的链式多索引操作，使其能够正确生成包含所有排列组合的 `PointerSet`。
 
 ### 评论
-文档是代码的门面。新的语法大大简化了集合创建的视觉复杂度，将其作为“高级用法”中的首推方案，能极大地提升项目的吸引力。
+这是一个关于“语义代数”完备性的重要修复。在处理复杂的配置路径或多维状态空间时，用户期望操作符的行为在标量（Pointer）和向量（Set）之间是高度一致且可预测的。
 
 ### 目标
-1. 更新英文 `README.md` 的 "Pointer Algebra" 章节。
-2. 更新中文 `README.zh.md` 的 “指针代数” 章节。
-3. 替换过时的 `PointerSet([L.a, L.b])` 构造示例为更优雅的 `L['a', 'b']`。
+1.  修正 `PointerSet.__getitem__` 以处理元组索引。
+2.  在测试套件中增加针对该场景的断言，确保链式操作的正确性。
 
 ### 基本原理
-通过对比“旧方式”和“新方式”，或者直接展示“新方式”的流畅性，让开发者感受到 DSL 的演进。我们在文档中强调这不仅仅是快捷方式，而是一种“语义寻址协议”的体现。
+利用已有的 `__mul__` 逻辑。在 `SemanticPointer` 中，`p[a, b]` 是 `p * (a, b)` 的语法糖。在 `PointerSet` 中应用同样的规则：`ps[a, b]` 应当等同于 `ps * (a, b)`。这样既解决了哈希问题，又在语义上保持了优雅的对称。
 
 ### 标签
-#intent/document #flow/ready #priority/medium
-#comp/docs #concept/navigation #scope/ux #scope/dx
+#intent/fix #flow/ready #priority/high
+#comp/runtime #concept/state #scope/core
 #ai/instruct
-#task/domain/docs #task/object/readme #task/action/refactor
-#task/state/end #task/status/completed
+#task/domain/logic #task/object/pointer-algebra #task/action/fix
+#task/state/begin #task/status/active
 
 ---
 
 ### Script
 
-#### Acts 1: 更新英文文档 (README.md)
+#### Acts 1: 修正 `PointerSet` 的索引逻辑
+
+我们将修改 `packages/pyneedle-pointer/src/needle/pointer/set.py`，增加对多索引的判断。
 
 ~~~~~act
 patch_file
-packages/pyneedle/README.md
+packages/pyneedle-pointer/src/needle/pointer/set.py
 ~~~~~
-~~~~~markdown.old
-### Pointer Algebra
-
-Create sets of pointers for powerful, expressive operations.
-
-```python
-from needle import L, PointerSet
-
-# Define a set of base pointers
-user_fields = PointerSet([L.user.name, L.user.email])
-
-# Broadcast a suffix across the set
-form_labels = user_fields / "label"
-# Result: PointerSet({L.user.name.label, L.user.email.label})
-
-# Use multiplication for cartesian-product-like expansion
-actions = {"read", "write"}
-permissions = L.auth.user * actions
-# Result: PointerSet({L.auth.user.read, L.auth.user.write})
-```
+~~~~~python.old
+    def __getitem__(self, key: Any) -> "PointerSet":
+        # Broadcast indexing to all pointers in the set.
+        # This allows L["a", "b"][0] -> {L.a[0], L.b[0]}
+        return PointerSet(p[key] for p in self)
 ~~~~~
-~~~~~markdown.new
-### Pointer Algebra
+~~~~~python.new
+    def __getitem__(self, key: Any) -> "PointerSet":
+        if isinstance(key, tuple):
+            # Rule: Multiple indices ps['a', 'b'] should broadcast and flatten.
+            # Equivalent to ps * key.
+            return self * key
 
-Create sets of pointers for powerful, expressive operations. PyNeedle supports fluent broadcasting and multi-indexing.
-
-```python
-from needle import L
-
-# 1. Multi-indexing shortcut
-# Create a PointerSet effortlessly
-user_fields = L.user['name', 'email']
-# Result: PointerSet({L.user.name, L.user.email})
-
-# 2. Attribute & Index Broadcasting
-# Broadcast a suffix or index across the entire set fluently
-form_labels = user_fields.label
-# Result: PointerSet({L.user.name.label, L.user.email.label})
-
-# 3. Cartesian Product Expansion
-# Use multiplication to expand a pointer into a set
-actions = {"read", "write"}
-permissions = L.auth.user * actions
-# Result: PointerSet({L.auth.user.read, L.auth.user.write})
-
-# 4. Advanced Chaining
-# Combine everything for powerful resource addressing
-errors = L.api['v1', 'v2'][404].message
-# Result: PointerSet({L.api.v1[404].message, L.api.v2[404].message})
-```
+        # Broadcast indexing to all pointers in the set.
+        # This allows L["a", "b"][0] -> {L.a[0], L.b[0]}
+        return PointerSet(p[key] for p in self)
 ~~~~~
 
-#### Acts 2: 更新中文文档 (README.zh.md)
+#### Acts 2: 增加回归测试用例
+
+在 `packages/pyneedle-pointer/tests/test_pointer_algebra.py` 中添加对应的测试，验证复杂的嵌套索引。
 
 ~~~~~act
 patch_file
-packages/pyneedle/README.zh.md
+packages/pyneedle-pointer/tests/test_pointer_algebra.py
 ~~~~~
-~~~~~markdown.old
-### 指针代数
-
-创建指针集合以进行强大且富有表现力的操作。
-
-```python
-from needle import L, PointerSet
-
-# 定义一个基础指针集合
-user_fields = PointerSet([L.user.name, L.user.email])
-
-# 在集合的每个成员上广播一个后缀
-form_labels = user_fields / "label"
-# 结果: PointerSet({L.user.name.label, L.user.email.label})
-
-# 使用乘法进行类似笛卡尔积的扩展
-actions = {"read", "write"}
-permissions = L.auth.user * actions
-# 结果: PointerSet({L.auth.user.read, L.auth.user.write})
-```
+~~~~~python.old
+    # Combined complex chaining
+    ps2 = L["http", "ftp"].v1[404].detail
+    assert ps2 == {L.http.v1[404].detail, L.ftp.v1[404].detail}
 ~~~~~
-~~~~~markdown.new
-### 指针代数
+~~~~~python.new
+    # Combined complex chaining
+    ps2 = L["http", "ftp"].v1[404].detail
+    assert ps2 == {L.http.v1[404].detail, L.ftp.v1[404].detail}
 
-创建指针集合以进行强大且富有表现力的操作。PyNeedle 支持流畅的广播和多重索引。
 
-```python
-from needle import L
+def test_pointer_set_complex_nested_multi_index():
+    # Fix for: L['a','b'][0][1,2] -> TypeError: unhashable type: 'PointerSet'
+    result = L["a", "b"][0][1, 2]
 
-# 1. 多重索引快捷方式
-# 轻松创建一个指针集合 (PointerSet)
-user_fields = L.user['name', 'email']
-# 结果: PointerSet({L.user.name, L.user.email})
-
-# 2. 属性与索引广播
-# 在整个集合上流畅地广播后缀或索引
-form_labels = user_fields.label
-# 结果: PointerSet({L.user.name.label, L.user.email.label})
-
-# 3. 笛卡尔积扩展
-# 使用乘法将单个指针扩展为集合
-actions = {"read", "write"}
-permissions = L.auth.user * actions
-# 结果: PointerSet({L.auth.user.read, L.auth.user.write})
-
-# 4. 高级链式调用
-# 组合所有特性，实现强大的资源寻址
-errors = L.api['v1', 'v2'][404].message
-# 结果: PointerSet({L.api.v1[404].message, L.api.v2[404].message})
-```
-~~~~~
-
-#### Acts 3: 提交文档更新
-
-~~~~~act
-git_add
-packages/pyneedle/README.md
-packages/pyneedle/README.zh.md
-~~~~~
-
-~~~~~act
-git_commit
-~~~~~
-~~~~~text
-docs: update READMEs to showcase multi-indexing and broadcasting
-
-Updated both English and Chinese READMEs to reflect the latest pointer
-algebra features. Replaced the legacy 'PointerSet' constructor example
-with the more elegant 'L[a, b]' shortcut and demonstrated the power
-of attribute/index broadcasting.
+    expected = {
+        L.a[0][1],
+        L.a[0][2],
+        L.b[0][1],
+        L.b[0][2],
+    }
+    assert result == expected
+    assert isinstance(result, PointerSet)
 ~~~~~
 
 ### 下一步建议
-- **Stitcher 同步**: 既然运行时已经支持了这些语法，如果你还在维护 `Stitcher`（代码生成工具），可能需要检查其生成的 Stub 文件是否能与这种多态的 `__getitem__` 完美配合。
-- **发布新版本**: 如果所有测试和文档都已就绪，现在可以考虑正式发布 `0.1.4` 版本了。
+- **执行测试**: 运行 `pytest packages/pyneedle-pointer/tests/test_pointer_algebra.py` 验证修复。
+- **提交变更**: 如果测试通过，我将生成一个 `[COMMIT]` 计划。
