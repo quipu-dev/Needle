@@ -1,14 +1,14 @@
 # 📸 Snapshot Capture
 
 ### 💬 备注:
-ruff
+stitcher
 
 检测到工作区发生变更。
 
 ### 📝 变更文件摘要:
 ```
-packages/pyneedle-pointer/src/needle/pointer/core.py    | 12 +++++-------
- packages/pyneedle-pointer/tests/test_pointer_algebra.py |  8 ++++----
- uv.lock                                                 | 10 +++++-----
- 3 files changed, 14 insertions(+), 16 deletions(-)
+.../pyneedle-pointer/src/needle/pointer/core.py    |  7 -------
+ .../src/needle/pointer/core.stitcher.yaml          | 11 ++++++----
+ packages/pyneedle-pointer/stitcher.lock            | 24 +++++++++++++++-------
+ 3 files changed, 24 insertions(+), 18 deletions(-)
 ```
