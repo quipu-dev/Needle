@@ -152,17 +152,30 @@ def test_pointer_multiplication_is_flexible_and_chainable():
 
 
 def test_pointer_getitem_multi_index():
-    # Multi-index L['a', 'b'] should return a PointerSet
-    ps = L["a", "b"]
-    assert isinstance(ps, PointerSet)
-    assert len(ps) == 2
-    assert L.a in ps
-    assert L.b in ps
+    # Multi-index L['a', 'b'] (tuple) should return a PointerSet
+    ps_tuple = L["a", "b"]
+    assert isinstance(ps_tuple, PointerSet)
+    assert len(ps_tuple) == 2
+    assert L.a in ps_tuple
+    assert L.b in ps_tuple
 
-    # Chaining with multi-index: L.api['v1', 'v2'].users
+    # NEW: Multi-index L[['a', 'b']] (list) should return a PointerSet
+    ps_list = L[["a", "b"]]
+    assert ps_list == ps_tuple
+
+    # NEW: Multi-index L[{'a', 'b'}] (set) should return a PointerSet
+    ps_set = L[{"a", "b"}]
+    assert ps_set == ps_tuple
+
+    # Chaining with multi-index (tuple): L.api['v1', 'v2'].users
     # This proves broadcasting works after the shortcut creation.
     ps2 = L.api["v1", "v2"].users
-    assert ps2 == {L.api.v1.users, L.api.v2.users}
+    expected_ps = {L.api.v1.users, L.api.v2.users}
+    assert ps2 == expected_ps
+
+    # NEW: Chaining with multi-index (list)
+    ps3 = L.api[["v1", "v2"]].users
+    assert ps3 == expected_ps
 
 
 def test_pointer_wildcard_indexing():

@@ -47,8 +47,14 @@ class SemanticPointer(SemanticPointerProtocol):
         return self._join(other)
 
     def __getitem__(self, key: Any) -> Union["SemanticPointer", "PointerSetProtocol"]:
-        if isinstance(key, tuple):
-            # Rule: Multiple indices L['a', 'b'] return a PointerSet.
+        # Check if the key is a non-string/non-pointer iterable (excluding bytes)
+        # We explicitly exclude SemanticPointerProtocol to prevent infinite recursion
+        # if a pointer were somehow passed as a raw key, and to treat single pointers
+        # as a singular path segment via self._join(str(key)).
+        if isinstance(key, Iterable) and not isinstance(
+            key, (str, bytes, SemanticPointerProtocol)
+        ):
+            # Rule: Multiple indices L[iterable] return a PointerSet.
             # Equivalent to self * key.
             return self * key
 
