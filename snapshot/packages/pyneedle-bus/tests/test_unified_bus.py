@@ -1,60 +1,3 @@
-好的，我们将创建一个全面的集成测试来验证 `pyneedle-bus` 的核心能力。这个测试将模拟一个真实的应用场景：一个核心应用带有默认文案，一个插件覆写了部分文案并添加了新文案，我们需要验证 I18n 分层、语言切换以及 EventBus 到 FeedbackBus 的桥接。
-
-## [WIP] test: Add integration test for unified pyneedle-bus
-
-### 用户需求
-
-创建一个集成测试，以验证新实现的 `pyneedle-bus` 的核心功能，包括：
-1.  `MessageStore`作为 Operator 编排器的能力，正确加载和覆盖多层资源。
-2.  `FeedbackBus` 基于 `SemanticPointer` 和系统语言环境进行正确渲染的能力。
-3.  `EventBus` 的事件分发能力。
-4.  `LogBridge` 自动将 `EventBus` 事件桥接到 `FeedbackBus` 的能力。
-
-### 评论
-
-这个集成测试是确保 `pyneedle-bus` 架构正确性的关键验证步骤。它不仅仅是单元测试各个组件，而是将 `MessageStore`, `EventBus`, `FeedbackBus`, 和 `LogBridge` 作为一个整体进行端到端的测试。通过模拟真实世界中的插件覆盖（Overlay）场景，我们可以确保 `pyneedle-runtime` 的 Operator 体系被正确地复用，并且 I18n 逻辑健壮可靠。这个测试的通过将为后续在 `Stitcher`, `Quipu`, 和 `Cascade` 中进行“心脏移植”手术提供强大的信心。
-
-### 目标
-
-1.  验证 `MessageStore` 能够通过 `register_asset_root` 正确地构建一个具有优先级的 `OverlayOperator`。
-2.  证明高优先级的资源（插件）能够覆盖低优先级的资源（核心应用）。
-3.  证明当高优先级资源缺失时，系统能正确回退到低优先级资源。
-4.  验证通过环境变量切换语言（`NEEDLE_LANG`）后，`FeedbackBus` 能输出正确的本地化字符串。
-5.  证明 `LogBridge` 能够成功监听 `EventBus` 上的事件，并使用事件的 Topic 作为 `SemanticPointer` 触发 `FeedbackBus` 进行渲染。
-
-### 基本原理
-
-我们将使用 `pytest` 的 fixture 机制来创建一个临时的、层次化的资源目录结构，模拟一个应用和一个插件。然后，我们将创建一个“Spy Renderer” fixture，它不实际打印内容，而是捕获所有被请求渲染的消息和级别，以便我们进行断言。
-
-测试函数将遵循以下步骤：
-1.  **Arrange**: 初始化 `MessageStore`、`EventBus` 和 `FeedbackBus` 的干净实例。注册模拟的应用和插件资源根目录。设置 Spy Renderer。实例化并配置 `LogBridge`。
-2.  **Act & Assert (FeedbackBus)**: 直接调用 `feedback_bus.present()`，并切换语言环境，检查 Spy Renderer 是否捕获到了预期的、经过正确覆盖和回退的本地化字符串。
-3.  **Act & Assert (EventBus -> Bridge)**: 调用 `event_bus.publish()` 发布一个事件，其 Topic 对应一个已知的 I18n Key。然后检查 Spy Renderer，断言 `LogBridge` 已经成功触发了 `FeedbackBus` 并渲染了正确的消息。
-
-### 标签
-
-#intent/tooling #flow/ready #priority/high #comp/bus #comp/tests #concept/event #concept/i18n #scope/core #task/domain/bus #task/object/integration-test #task/action/implementation #task/state/continue
-
----
-
-### Script
-
-#### Acts 1: 创建测试文件及目录
-
-首先，为 `pyneedle-bus` 包创建 `tests` 目录和测试文件。
-
-~~~~~act
-run_command
-~~~~~
-~~~~~
-mkdir -p packages/pyneedle-bus/tests
-~~~~~
-
-~~~~~act
-write_file
-packages/pyneedle-bus/tests/test_unified_bus.py
-~~~~~
-~~~~~python
 import os
 import json
 from pathlib import Path
@@ -198,15 +141,3 @@ def test_unified_bus_integration(mock_asset_structure, monkeypatch):
     assert spy_renderer.get_last_message() == "Goodbye from Plugin!"
     # Check log level
     assert spy_renderer.calls[0][1] == "success"
-
-~~~~~
-
-### 下一步建议
-
-这个集成测试为 `pyneedle-bus` 的功能提供了坚实的保障。现在，我们可以充满信心地开始第一阶段的“边缘绞杀”：
-1.  **目标**: `stitcher-monorepo`。
-2.  **行动**:
-    *   删除 `packages/stitcher-bus`。
-    *   在 `stitcher` 的 CLI 入口点或应用工厂中，导入 `pyneedle.bus.message_store` 并调用 `message_store.register_asset_root()` 来注册 `stitcher` 自己的 `assets` 目录。
-    *   将所有对旧 `stitcher.bus.bus` 的引用替换为对 `pyneedle.bus.bus` 的引用。
-    *   运行 `stitcher` 的测试套件，确保所有依赖 `bus` 的测试依然通过。
