@@ -38,6 +38,7 @@ dev = [
     "ruff",
     "mypy",
     "pyneedle",
+    "pyneedle-bus",
     "pyneedle-pointer",
     "pyneedle-runtime",
     "pyneedle-spec",
@@ -53,6 +54,7 @@ members = [
 
 [tool.uv.sources]
 pyneedle = { workspace = true }
+pyneedle-bus = { workspace = true }
 pyneedle-runtime = { workspace = true }
 pyneedle-pointer = { workspace = true }
 pyneedle-spec = { workspace = true }
@@ -63,6 +65,7 @@ testpaths = ["tests", "packages"]
 norecursedirs = ["tests/fixtures"]
 pythonpath = [
     "packages/pyneedle/src",
+    "packages/pyneedle-bus/src",
     "packages/pyneedle-pointer/src",
     "packages/pyneedle-runtime/src",
     "packages/pyneedle-spec/src",
@@ -80,6 +83,7 @@ stub_package = "packages/needle-stubs"
 include = ["packages", "tests"]
 extraPaths = [
     "packages/pyneedle-spec/src",
+    "packages/pyneedle-bus/src",
     "packages/pyneedle-pointer/src",
     "packages/pyneedle-runtime/src",
     "packages/pyneedle/src",
