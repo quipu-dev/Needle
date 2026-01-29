@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "Capture: M README.md, A needle_ico.png", "type": "capture", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769616633.6490235, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[WIP] feat: 创建 pyneedle-bus 包骨架并集成到工作区", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769699842.985911, "duration_ms": 0}}
