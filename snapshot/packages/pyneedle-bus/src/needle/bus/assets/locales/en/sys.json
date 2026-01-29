@@ -1,0 +1,4 @@
+{
+    "sys.error.fallback": "An unexpected system error occurred.",
+    "sys.error.formatting": "<Formatting error for '{msg_id}': missing key {key}>"
+}

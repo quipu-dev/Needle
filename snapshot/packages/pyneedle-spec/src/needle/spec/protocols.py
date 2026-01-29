@@ -40,3 +40,19 @@ class PointerSetProtocol(Protocol):
 
 class OperatorProtocol(Protocol):
     def __call__(self, key: Any) -> Any: ...
+
+
+class Renderer(Protocol):
+    """
+    The protocol for rendering feedback messages to an output stream (like a console).
+    """
+
+    def render(self, message: str, level: str) -> None:
+        """
+        Renders a message with a specified severity level.
+
+        Args:
+            message: The final, formatted string to be displayed.
+            level: A string representing the severity (e.g., "info", "error").
+        """
+        ...
