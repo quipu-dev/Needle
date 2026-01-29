@@ -189,3 +189,17 @@ def test_pointer_set_getitem_broadcasting():
     # Combined complex chaining
     ps2 = L["http", "ftp"].v1[404].detail
     assert ps2 == {L.http.v1[404].detail, L.ftp.v1[404].detail}
+
+
+def test_pointer_set_complex_nested_multi_index():
+    # Fix for: L['a','b'][0][1,2] -> TypeError: unhashable type: 'PointerSet'
+    result = L["a", "b"][0][1, 2]
+
+    expected = {
+        L.a[0][1],
+        L.a[0][2],
+        L.b[0][1],
+        L.b[0][2],
+    }
+    assert result == expected
+    assert isinstance(result, PointerSet)
