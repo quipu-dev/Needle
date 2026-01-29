@@ -66,7 +66,7 @@ def test_pointer_atomic_vs_container_behavior():
     p1 = L.api * "v1"
     assert isinstance(p1, SemanticPointer)
     assert p1 == "api.v1"
-    
+
     # Division behaves the same
     p2 = L.api / "v1"
     assert p2 == p1
@@ -76,7 +76,7 @@ def test_pointer_atomic_vs_container_behavior():
     ps1 = L.api * ["v1"]
     assert isinstance(ps1, PointerSet)
     assert L.api.v1 in ps1
-    
+
     # Division behaves the same
     ps2 = L.api / ["v1"]
     assert ps2 == ps1
@@ -84,7 +84,7 @@ def test_pointer_atomic_vs_container_behavior():
 
 def test_pointer_recursive_flattening():
     # Test L[[[1, 2]]] -> {L.1, L.2}
-    
+
     # Using getitem
     ps1 = L[[[1, 2]]]
     assert isinstance(ps1, PointerSet)
@@ -93,7 +93,7 @@ def test_pointer_recursive_flattening():
     # Using multiplication
     ps2 = L * [[[1], 2]]
     assert ps2 == ps1
-    
+
     # Using division
     ps3 = L / (1, (2,))
     assert ps3 == ps1

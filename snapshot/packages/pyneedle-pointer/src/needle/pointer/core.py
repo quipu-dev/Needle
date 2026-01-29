@@ -40,9 +40,9 @@ class SemanticPointer(SemanticPointerProtocol):
 
     def _is_atomic(self, item: Any) -> bool:
         """Check if an item should be treated as a single path segment."""
-        return isinstance(item, (str, bytes, SemanticPointerProtocol)) or not isinstance(
-            item, Iterable
-        )
+        return isinstance(
+            item, (str, bytes, SemanticPointerProtocol)
+        ) or not isinstance(item, Iterable)
 
     def _recursive_flatten(self, item: Any) -> Iterable[Any]:
         """Yield atomic items from nested iterables."""
@@ -52,9 +52,7 @@ class SemanticPointer(SemanticPointerProtocol):
             for sub_item in item:
                 yield from self._recursive_flatten(sub_item)
 
-    def __mul__(
-        self, other: Any
-    ) -> Union["SemanticPointer", "PointerSetProtocol"]:
+    def __mul__(self, other: Any) -> Union["SemanticPointer", "PointerSetProtocol"]:
         """
         The SSoT for composition.
         - If 'other' is atomic: Join it (Return SemanticPointer).
@@ -69,7 +67,7 @@ class SemanticPointer(SemanticPointerProtocol):
 
         # Flatten deeply nested structures like [[[1, 2]]] -> 1, 2
         flat_items = list(self._recursive_flatten(other))
-        
+
         # Note: Even if the container has 1 item (L * [1]), we return a PointerSet
         # to distinguish "User provided a list" vs "User provided an atom".
         return PointerSet(self._join(str(item)) for item in flat_items)
