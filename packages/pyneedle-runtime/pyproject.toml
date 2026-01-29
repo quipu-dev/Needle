@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyneedle-runtime"
-version = "0.1.1"
+version = "0.1.2"
 description = "Core runtime for the PyNeedle ecosystem."
 authors = [
     { name = "doucx", email = "doucxldh@gmail.com" },
@@ -12,8 +12,8 @@ authors = [
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 dependencies = [
-    "pyneedle-spec ~= 0.1.0",
-    "pyneedle-pointer ~= 0.1.0",
+    "pyneedle-spec ~= 0.1.2",
+    "pyneedle-pointer ~= 0.1.2",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

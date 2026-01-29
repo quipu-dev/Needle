@@ -46,7 +46,13 @@ class SemanticPointer(SemanticPointerProtocol):
     ) -> "SemanticPointer":
         return self._join(other)
 
-    def __getitem__(self, key: Union[str, int]) -> "SemanticPointer":
+    def __getitem__(self, key: Any) -> Union["SemanticPointer", "PointerSetProtocol"]:
+        if isinstance(key, tuple):
+            # Rule: Multiple indices L['a', 'b'] return a PointerSet.
+            # Equivalent to self * key.
+            return self * key
+
+        # Rule: Single index L['+'] returns a single SemanticPointer.
         return self._join(str(key))
 
     def __mul__(self, other: Any) -> "PointerSetProtocol":
