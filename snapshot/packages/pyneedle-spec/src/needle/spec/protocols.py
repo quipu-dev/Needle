@@ -43,17 +43,4 @@ class OperatorProtocol(Protocol):
 
 
 class RendererProtocol(Protocol):
-    """
-    Protocol for feedback rendering systems (CLI, TUI, Web, etc.).
-    """
-
-    def render(self, message: str, level: str = "info", **kwargs: Any) -> None:
-        """
-        Render a pre-formatted message to the user.
-
-        Args:
-            message: The fully formatted string (templates resolved).
-            level: The severity/channel (info, success, warning, error, debug).
-            **kwargs: Extra context for specific renderers (e.g. TUI widgets).
-        """
-        ...
+    def render(self, message: str, level: str = "info", **kwargs: Any) -> None: ...
