@@ -1,4 +1,4 @@
-from typing import Protocol, Any, Union, Iterable, Iterator, TypeVar, runtime_checkable
+from typing import Protocol, Any, Union, Iterator, TypeVar, runtime_checkable
 
 # T_co is covariant, meaning SemanticPointerProtocol can return subtypes of itself
 T_Pointer = TypeVar("T_Pointer", bound="SemanticPointerProtocol", covariant=True)

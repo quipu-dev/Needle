@@ -1,0 +1,21 @@
+FeedbackBus: |-
+  The output channel for the application.
+  It relies on an injected Operator to resolve Pointers to Templates.
+FeedbackBus.present: |-
+  Present a message to the user via the registered renderer.
+
+  Args:
+      ptr: Semantic Pointer to the message template (e.g. L.io.file_saved)
+      level: 'info', 'success', 'warning', 'error', 'debug'
+      **kwargs: Arguments for template formatting
+FeedbackBus.render_to_string: |-
+  Resolve a template and format it into a string without rendering.
+
+  Args:
+      ptr: Semantic Pointer or string ID of the template.
+      **kwargs: Arguments for template formatting.
+
+  Returns:
+      The fully formatted message string.
+FeedbackBus.set_operator: |-
+  Inject the Operator (Nexus) responsible for resolving pointers.

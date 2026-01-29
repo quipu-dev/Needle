@@ -43,6 +43,11 @@
       "baseline_code_signature_text": "def __init__(self, path: str = ''):",
       "baseline_code_structure_hash": "1f03fc7f4d6f0b286fc2b36b0419e935554b966cfe4f72b34822e6cc5c1a2e89"
     },
+    "py://packages/pyneedle-pointer/src/needle/pointer/core.py#SemanticPointer.__iter__": {
+      "baseline_code_signature_text": "def __iter__(self) -> Iterator[SemanticPointer]:",
+      "baseline_code_structure_hash": "2414e6b9a327b1c8fc3e9ec325e07d7ca625f7d12e911870afc6f2b3b5897810",
+      "baseline_yaml_content_hash": "db864b2c35565b9fe620059ba7e796e9dfbb62fe5531dc469e5674c2010f9389"
+    },
     "py://packages/pyneedle-pointer/src/needle/pointer/core.py#SemanticPointer.__mul__": {
       "baseline_code_signature_text": "def __mul__(self, other: Any) -> Union[SemanticPointer, PointerSetProtocol]:",
       "baseline_code_structure_hash": "85599324854c7c045962adc2a85aa2476296e5bad8d8d99ad4a5314cf64e9e34",

@@ -37,8 +37,8 @@
       "baseline_code_structure_hash": "573497f156a247b0f058d7e85deea1d95caa624535d23ed62c058a4cf6be7727"
     },
     "py://packages/pyneedle-spec/src/needle/spec/protocols.py#PointerSetProtocol.__iter__": {
-      "baseline_code_signature_text": "def __iter__(self) -> Iterable[SemanticPointerProtocol]:",
-      "baseline_code_structure_hash": "9c54c6e76c87768f872a7ab08eace4ca4be258e17bbf734634adf1305d6f52a1",
+      "baseline_code_signature_text": "def __iter__(self) -> Iterator[SemanticPointerProtocol]:",
+      "baseline_code_structure_hash": "bb1f394fa49b1d0b4a9aac0f0a45786af89847945a9aa72b1520d140f1eb7a6d",
       "baseline_yaml_content_hash": "562aa4c0733fc9eb8dcb54d884837aaded1baac4216f8158cfb0ca4f91a6b1f9"
     },
     "py://packages/pyneedle-spec/src/needle/spec/protocols.py#PointerSetProtocol.__mul__": {
@@ -94,6 +94,10 @@
       "baseline_code_signature_text": "def __hash__(self) -> int:",
       "baseline_code_structure_hash": "53ee96944ca95927e3268dafe9cc2e667cbded1f5bd6b47fc36209593ac659ff",
       "baseline_yaml_content_hash": "416bf7b9d3014eeaa2924498082d1a93b71cc8f2b49b5cf7fa3122d463da649b"
+    },
+    "py://packages/pyneedle-spec/src/needle/spec/protocols.py#SemanticPointerProtocol.__iter__": {
+      "baseline_code_signature_text": "def __iter__(self) -> Iterator[T_Pointer]:",
+      "baseline_code_structure_hash": "fb0e54ac7e251044e20fa84cd722a7253eee6f02e0a8ac0cdca43a7afc96876f"
     },
     "py://packages/pyneedle-spec/src/needle/spec/protocols.py#SemanticPointerProtocol.__mul__": {
       "baseline_code_signature_text": "def __mul__(self, other: Any) -> PointerSetProtocol:",

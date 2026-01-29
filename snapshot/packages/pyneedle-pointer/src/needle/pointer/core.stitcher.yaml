@@ -29,3 +29,8 @@ SemanticPointer._is_atomic: |-
   Check if an item should be treated as a single path segment.
 SemanticPointer._recursive_flatten: |-
   Yield atomic items from nested iterables.
+SemanticPointer.__iter__: |-
+  Yield self.
+  This prevents Python from falling back to __getitem__ based iteration,
+  which would cause an infinite loop (L[0], L[1]...) as we support L[Any].
+  It also allows L to be treated as a unitary collection in loops.

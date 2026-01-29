@@ -1,0 +1,90 @@
+{
+  "fingerprints": {
+    "py://packages/pyneedle-bus/src/needle/bus/bridge.py#LogBridge": {
+      "baseline_code_signature_text": "class LogBridge:",
+      "baseline_code_structure_hash": "0b01fe64691407cc5b757646c5266f8aefea777ee60f7a8fed85b6aa70c15821",
+      "baseline_yaml_content_hash": "802f91ea0bc6c787644d60c7a29ff4413edc0fa0e27a1c5347efb8f27237ed53"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/bridge.py#LogBridge.__init__": {
+      "baseline_code_signature_text": "def __init__(self, event_bus: EventBus, feedback_bus: FeedbackBus):",
+      "baseline_code_structure_hash": "2faec14390d6b30dff8e8c6fdfa31dc644310544367bb1516e6773bc788978f4"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/bridge.py#LogBridge.connect": {
+      "baseline_code_signature_text": "def connect(self, topic: Union[str, SemanticPointerProtocol, Type[Any]], ptr: Union[str, SemanticPointerProtocol, None] = None, level: str = 'info') -> None:",
+      "baseline_code_structure_hash": "7d1bb498e2ddbbd838cc8ca45536ce93a5e120f2e359e949f5bbb092b3171302",
+      "baseline_yaml_content_hash": "148b045c64fff53288140f4786466fee14d49cbf4634c1795092dab717f426b8"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/event.py#EventBus": {
+      "baseline_code_signature_text": "class EventBus:",
+      "baseline_code_structure_hash": "455856406d09ec8e0013faa4eeae6ba1eea073bd305bba1e9d6e6c88375888a1",
+      "baseline_yaml_content_hash": "80f1cadc7b1db32f35503f8923f8c92deefe175d475fc5aec85f3af1f1549205"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/event.py#EventBus.__init__": {
+      "baseline_code_signature_text": "def __init__(self):",
+      "baseline_code_structure_hash": "9bab2b1dd22fea04e58176b09f65ef4f673738c47abf25fca7e0c62af472206f"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/event.py#EventBus.publish": {
+      "baseline_code_signature_text": "def publish(self, event: Any, topic: Union[str, SemanticPointerProtocol, None] = None) -> None:",
+      "baseline_code_structure_hash": "ecaaf773b42b72c56ad2e9309afe162ee8508654a87f761ff77fa50b75410329",
+      "baseline_yaml_content_hash": "20522b620dd36091694e1a471574f76c2db4533543c1fbb15e6f70304ad9ac2b"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/event.py#EventBus.subscribe": {
+      "baseline_code_signature_text": "def subscribe(self, topic: Union[str, SemanticPointerProtocol, Type[Any]], handler: EventHandler) -> None:",
+      "baseline_code_structure_hash": "396a0659819f6dd5cc32a3b97d7d22fc11da3acb68670a1a25ac39bce99a2713",
+      "baseline_yaml_content_hash": "ab6b3e210597d658b7fc0db6ee58337dae5d03d40f3900a3f2def2ef9e44d707"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus": {
+      "baseline_code_signature_text": "class FeedbackBus:",
+      "baseline_code_structure_hash": "7deb756b2b17cf076baa1237a420d12b6f6eb487e0522b17991cdaa36fcd3782",
+      "baseline_yaml_content_hash": "9bbc244f509b986e8ce6b7abb945483760dc103322ced0fc55503267e295d0d5"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus.__init__": {
+      "baseline_code_signature_text": "def __init__(self, operator: Optional[OperatorProtocol] = None, renderer: Optional[RendererProtocol] = None):",
+      "baseline_code_structure_hash": "c69d9e1810801db1d3f0daaa3d3e2ac70840e7c796b634f4cabe5ddef44f1fde"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus._get_template": {
+      "baseline_code_signature_text": "def _get_template(self, ptr: Union[str, SemanticPointerProtocol]) -> str:",
+      "baseline_code_structure_hash": "7ec53fb28e406ed02cb075d9f6958f07f7f4fafc85279e5b7ae974de713de9b1"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus.debug": {
+      "baseline_code_signature_text": "def debug(self, ptr: Union[str, SemanticPointerProtocol], **kwargs: Any = {}) -> None:",
+      "baseline_code_structure_hash": "727ad378712eab530e906dd5d00d3d63bd6b9ceaf355885b3c8ee098104bf5de"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus.error": {
+      "baseline_code_signature_text": "def error(self, ptr: Union[str, SemanticPointerProtocol], **kwargs: Any = {}) -> None:",
+      "baseline_code_structure_hash": "3566ddf597050828c43eaa7ebf787a6cac57312442f9f67b77e22ab5b9d068b1"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus.info": {
+      "baseline_code_signature_text": "def info(self, ptr: Union[str, SemanticPointerProtocol], **kwargs: Any = {}) -> None:",
+      "baseline_code_structure_hash": "4f0b9be038a22ba18cec72c7436c42fb8e63cb0b6755e3a1baff89fdfc4e78af"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus.present": {
+      "baseline_code_signature_text": "def present(self, ptr: Union[str, SemanticPointerProtocol], level: str = 'info', **kwargs: Any = {}) -> None:",
+      "baseline_code_structure_hash": "27fcc5119d15d30a80b54246360078e37e02e841a2a4d2ca0600fad77b2487d1",
+      "baseline_yaml_content_hash": "1fe7061268713ebbf6290ff53e897ae23a0aa4538daad8ae7befbc4a66ccf986"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus.render_to_string": {
+      "baseline_code_signature_text": "def render_to_string(self, ptr: Union[str, SemanticPointerProtocol], **kwargs: Any = {}) -> str:",
+      "baseline_code_structure_hash": "0b704d5007e5ddddd8e4b3ba8e0e2c6585d9f00de5e55504400539c864d1ce11",
+      "baseline_yaml_content_hash": "5742d8f7c8cd4cd58c989f8336db92e5581409ebc45290f5104ffabfad840f0e"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus.set_operator": {
+      "baseline_code_signature_text": "def set_operator(self, operator: OperatorProtocol) -> None:",
+      "baseline_code_structure_hash": "5e26c61796c3c4c9dbad27612839572e77f7d566d90b365d5e1c6ae1dc62f6fa",
+      "baseline_yaml_content_hash": "4de1cd178a9a1130a86aec0db973a278ad99665782f7038a9b348e88ec556321"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus.set_renderer": {
+      "baseline_code_signature_text": "def set_renderer(self, renderer: RendererProtocol) -> None:",
+      "baseline_code_structure_hash": "492e61f284efbe77d12a151fc48f79db21de06debf34b554e9b96bd0f26dec24"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus.success": {
+      "baseline_code_signature_text": "def success(self, ptr: Union[str, SemanticPointerProtocol], **kwargs: Any = {}) -> None:",
+      "baseline_code_structure_hash": "06931920c686fda852b2025fb5fe4f7151c51092e3c65635dae4419057d7d3c9"
+    },
+    "py://packages/pyneedle-bus/src/needle/bus/feedback.py#FeedbackBus.warning": {
+      "baseline_code_signature_text": "def warning(self, ptr: Union[str, SemanticPointerProtocol], **kwargs: Any = {}) -> None:",
+      "baseline_code_structure_hash": "69f444e1dbdc704fdbeb916b0f3fb1f07eb54dd63214710b6268ae45a5f3f585"
+    }
+  },
+  "version": "1.0"
+}

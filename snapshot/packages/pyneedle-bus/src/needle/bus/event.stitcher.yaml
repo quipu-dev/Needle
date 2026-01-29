@@ -1,0 +1,19 @@
+EventBus: |-
+  A high-performance, in-memory event bus supporting Semantic Pointer routing.
+EventBus.publish: |-
+  Dispatch an event to subscribers.
+
+  Args:
+      event: The event object (dataclass, dict, etc.)
+      topic: Optional override for the topic.
+             If event has a 'topic' attribute or key, that is used by default.
+             If event is a SemanticPointer, it is treated as a signal (topic=event, data={}).
+EventBus.subscribe: |-
+  Subscribe to events.
+
+  Args:
+      topic: Can be:
+             - A Semantic Pointer (L.run.started) -> converted to string "run.started"
+             - A string ("run.started")
+             - A Class (RunStartedEvent) -> for type-based dispatch
+      handler: Function to call when event occurs.

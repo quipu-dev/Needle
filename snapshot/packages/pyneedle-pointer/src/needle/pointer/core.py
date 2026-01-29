@@ -13,12 +13,6 @@ class SemanticPointer(SemanticPointerProtocol):
         self._path = path
 
     def __iter__(self) -> Iterator["SemanticPointer"]:
-        """
-        Yield self.
-        This prevents Python from falling back to __getitem__ based iteration,
-        which would cause an infinite loop (L[0], L[1]...) as we support L[Any].
-        It also allows L to be treated as a unitary collection in loops.
-        """
         yield self
 
     def __getattr__(self, name: str) -> "SemanticPointer":
