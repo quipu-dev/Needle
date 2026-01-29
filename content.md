@@ -1,94 +1,56 @@
-You've correctly identified the issues. My previous generation had a subtle type-safety bug and an incorrect import path. Your analysis is spot on: `I18NFactoryOperator` lives in `needle.operators`, not `needle.runtime`, and the `LogBridge`'s auto-mapping logic was too naive, failing to account for type-based subscriptions which cannot be implicitly converted to a string key for I18n lookup.
+这是一个测试逻辑错误。在测试的第二部分，我们将环境变量 `NEEDLE_LANG` 设置为了 `"zh"`，但在第三部分（测试 EventBus）时，注释声称使用 `"EN locale"`，且断言期望的是英文结果 `"Goodbye from Plugin!"`，但代码并没有将语言切回英文，导致实际输出了中文 `"插件再见！"`。
 
-I will now generate a plan to fix these two specific errors, making the code both type-safe and correct.
+我将修复测试代码，在进入第三部分测试前显式将语言切回英文。
 
-## [WIP] fix: Resolve type errors in pyneedle-bus implementation
-
-### 错误分析
-
-The Pyright type checker has identified two valid issues in the initial implementation of `pyneedle-bus`:
-
-1.  **`bridge.py` Type Mismatch**: The `LogBridge.connect` method incorrectly assumes that any `topic` can be used as a `ptr` (a `SemanticPointer` or string) for the `FeedbackBus`. When a `topic` is a class type (e.g., `RunStartedEvent`), it cannot be used for I18n template lookup. This leads to a `TypeError` when `feedback_bus.present()` is called.
-2.  **`store.py` Import Error**: The `MessageStore` attempts to import `I18NFactoryOperator` and `OverlayOperator` from `needle.runtime`. The correct location for these components is the `needle.operators` namespace, which is provided by the `pyneedle-runtime` package.
+## [WIP] fix: 修复集成测试中的语言环境未重置问题
 
 ### 用户需求
 
-1.  Correct the import path in `packages/pyneedle-bus/src/needle/bus/store.py`.
-2.  Refactor the logic in `packages/pyneedle-bus/src/needle/bus/bridge.py` to be type-safe, explicitly handling the case where a type-based event is bridged.
+修复 `packages/pyneedle-bus/tests/test_unified_bus.py` 中的断言错误。
 
 ### 评论
 
-These fixes are essential for architectural correctness. The first fix ensures that `pyneedle-bus` correctly utilizes the `pyneedle-runtime`'s operator system as intended. The second, more critical fix, makes the `LogBridge` more robust and explicit. It enforces a clear contract: if you subscribe to an event by its *type*, you *must* explicitly provide the `SemanticPointer` to use for its log message, removing ambiguity and preventing runtime errors.
+测试失败验证了 I18n 逻辑实际上是**工作正常**的（它正确地在中文环境下输出了中文）。错误在于测试脚本的编排：在验证完中文场景后，未将环境重置回英文，导致后续期望英文输出的断言失败。只需添加一行代码将环境重置即可。
 
 ### 目标
 
-1.  Eliminate all Pyright errors in the `pyneedle-bus` package.
-2.  Ensure the `LogBridge` raises a helpful `TypeError` during setup if configured incorrectly, rather than failing during event handling.
-3.  Enable the integration test `test_unified_bus_integration` to pass without type errors.
+1.  修正测试文件，确保在测试 EventBus 桥接功能前，语言环境被正确设置为英文。
+2.  确保集成测试通过。
 
 ### 基本原理
 
-We will use two precise `patch_file` operations:
-1.  For `store.py`, we'll perform a simple line replacement of the incorrect import statement.
-2.  For `bridge.py`, we will replace the naive `target_ptr = ptr or topic` logic with an `if/elif/else` block that correctly validates the inputs and assigns `target_ptr` in a type-safe manner, raising an error for invalid configurations.
+使用 `patch_file` 在 `spy_renderer.clear()` 和 `3. ACT & ASSERT...` 之间插入 `monkeypatch.setenv("NEEDLE_LANG", "en")`。
 
 ### 标签
 
-#intent/fix #flow/ready #priority/high #comp/bus #concept/type-safety #scope/core #task/domain/bus #task/object/core-implementation #task/action/bug-fix #task/state/continue
+#intent/fix #flow/ready #priority/medium #comp/tests #scope/core #task/domain/bus #task/object/test-fix #task/action/patch #task/state/end
 
 ---
 
 ### Script
 
-#### Acts 1: Correct `MessageStore` Import Path
+#### Acts 1: 修复测试文件
 
-First, let's fix the incorrect import statement in `store.py`.
-
-~~~~~act
-patch_file
-packages/pyneedle-bus/src/needle/bus/store.py
-~~~~~
-~~~~~python
-from needle.runtime import I18NFactoryOperator, OverlayOperator
-~~~~~
-~~~~~python
-from needle.operators import I18NFactoryOperator, OverlayOperator
-~~~~~
-
-#### Acts 2: Implement Type-Safe Logic in `LogBridge`
-
-Now, we'll patch `bridge.py` to make the `connect` method robust and type-safe.
+在进入第三阶段测试前，显式将语言环境重置为英文。
 
 ~~~~~act
 patch_file
-packages/pyneedle-bus/src/needle/bus/bridge.py
+packages/pyneedle-bus/tests/test_unified_bus.py
 ~~~~~
 ~~~~~python
-        target_ptr = ptr or topic
-        
-        def handler(event: Any):
+    spy_renderer.clear()
+
+    # 3. ACT & ASSERT: EventBus -> Bridge -> FeedbackBus
 ~~~~~
 ~~~~~python
-        target_ptr: Union[str, SemanticPointerProtocol]
+    spy_renderer.clear()
 
-        if ptr is not None:
-            # Explicit mapping always wins.
-            target_ptr = ptr
-        elif not isinstance(topic, type):
-            # Auto-bridge for string/pointer topics.
-            target_ptr = topic
-        else:
-            # A type-based topic was given without an explicit pointer. This is an error.
-            raise TypeError(
-                f"Cannot auto-bridge event type '{getattr(topic, '__name__', 'UnknownType')}'. "
-                "An explicit 'ptr' (SemanticPointer) must be provided when connecting a type-based topic."
-            )
+    # Switch back to English for the final test
+    monkeypatch.setenv("NEEDLE_LANG", "en")
 
-        def handler(event: Any):
+    # 3. ACT & ASSERT: EventBus -> Bridge -> FeedbackBus
 ~~~~~
 
 ### 下一步建议
 
-The identified errors have been resolved. The `pyneedle-bus` codebase should now be type-correct and logically sound.
-
-The next logical step is to re-run the integration test you defined previously. It should now pass without any issues, confirming that our unified bus architecture works as designed. If you agree, I will re-run the test command.
+现在测试应该可以通过了。通过后，我们就可以正式开始对 `Stitcher` 进行“边缘绞杀”式的改造了。

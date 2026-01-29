@@ -1,1 +1,1 @@
-{"meta_version": "1.0", "summary": "[WIP] fix: Resolve type errors in pyneedle-bus implementation", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769702435.6353493, "duration_ms": 0}}
+{"meta_version": "1.0", "summary": "[WIP] fix: 修复集成测试中的语言环境未重置问题", "type": "plan", "generator": {"id": "manual", "tool": "quipu-cli"}, "env": {"quipu": "unknown", "python": "3.13.5", "os": "linux"}, "exec": {"start": 1769702512.6355708, "duration_ms": 0}}

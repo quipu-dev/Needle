@@ -123,6 +123,9 @@ def test_unified_bus_integration(mock_asset_structure, monkeypatch):
 
     spy_renderer.clear()
 
+    # Switch back to English for the final test
+    monkeypatch.setenv("NEEDLE_LANG", "en")
+
     # 3. ACT & ASSERT: EventBus -> Bridge -> FeedbackBus
     
     # Publish an event. The topic L.app.farewell is connected by the bridge.
