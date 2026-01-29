@@ -1,34 +1,38 @@
 from typing import Any, Optional, Union
 
-from needle.spec import SemanticPointerProtocol, RendererProtocol
-from .store import MessageStore
+from needle.spec import SemanticPointerProtocol, RendererProtocol, OperatorProtocol
 
 
 class FeedbackBus:
     """
-    The output channel for the application. Handles I18n lookup and rendering.
+    The output channel for the application.
+    It relies on an injected Operator to resolve Pointers to Templates.
     """
 
     def __init__(
-        self, store: MessageStore, renderer: Optional[RendererProtocol] = None
+        self,
+        operator: Optional[OperatorProtocol] = None,
+        renderer: Optional[RendererProtocol] = None,
     ):
-        self._store = store
+        self._operator = operator
         self._renderer = renderer
 
     def set_renderer(self, renderer: RendererProtocol) -> None:
         self._renderer = renderer
 
+    def set_operator(self, operator: OperatorProtocol) -> None:
+        """Inject the Operator (Nexus) responsible for resolving pointers."""
+        self._operator = operator
+
     def _get_template(self, ptr: Union[str, SemanticPointerProtocol]) -> str:
-        # 1. Detect Language
-        lang = self._store.detect_lang()
+        # 1. Fallback if no operator is set
+        if not self._operator:
+            return str(ptr)
 
-        # 2. Get Operator for that language
-        op = self._store.get_operator(lang)
+        # 2. Lookup template from the operator
+        template = self._operator(ptr)
 
-        # 3. Lookup
-        template = op(ptr)
-
-        # 4. Fallback: If not found, stringify the pointer itself
+        # 3. Fallback: If not found, stringify the pointer itself
         if template is None:
             return str(ptr)
 
