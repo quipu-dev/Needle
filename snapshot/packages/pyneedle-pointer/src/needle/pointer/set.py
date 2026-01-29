@@ -6,17 +6,7 @@ if TYPE_CHECKING:
 
 
 class PointerSet(Set["SemanticPointer"], PointerSetProtocol):
-    """
-    A collection of Semantic Pointers that acts as a Monad.
-    All operations are broadcasted to its members and results are auto-flattened.
-    """
-
     def _broadcast(self, op: Callable[["SemanticPointer"], Any]) -> "PointerSet":
-        """
-        The core engine: Apply 'op' to each member.
-        If the result is a set/iterable (dimension expansion), flatten it.
-        Otherwise (position movement), just add it.
-        """
         new_set = PointerSet()
         for p in self:
             res = op(p)

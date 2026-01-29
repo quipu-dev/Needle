@@ -71,7 +71,7 @@
     "py://packages/pyneedle-pointer/src/needle/pointer/set.py#PointerSet": {
       "baseline_code_signature_text": "class PointerSet(Set['SemanticPointer'], PointerSetProtocol):",
       "baseline_code_structure_hash": "6116b41284a6f83c519354c991afa7278f922abae74e2723e88baef9bf982834",
-      "baseline_yaml_content_hash": "4df755e83700d085cabf6a2dee88239b9fe43b414cf4957e015b802489569cc6"
+      "baseline_yaml_content_hash": "357bc76c8123721c8aa4e297909421f965532d7adcc872567ed18128b7451c9f"
     },
     "py://packages/pyneedle-pointer/src/needle/pointer/set.py#PointerSet.__add__": {
       "baseline_code_signature_text": "def __add__(self, other: Union[str, SemanticPointerProtocol]) -> PointerSet:",
@@ -95,6 +95,11 @@
       "baseline_code_signature_text": "def __truediv__(self, other: Union[str, SemanticPointerProtocol]) -> PointerSet:",
       "baseline_code_structure_hash": "744a00eeec951a45c5125126cbb1bbe7526e71fa5f558c19fa4eb866477b6449",
       "baseline_yaml_content_hash": "ac51231baf39115ba47265ac16b30f1519624ef158aebfca7ffeaf8ab2f5b534"
+    },
+    "py://packages/pyneedle-pointer/src/needle/pointer/set.py#PointerSet._broadcast": {
+      "baseline_code_signature_text": "def _broadcast(self, op: Callable[[SemanticPointer], Any]) -> PointerSet:",
+      "baseline_code_structure_hash": "e28a8635f8970d8739e9c649ed00fe38026bd5d72845fc2af736d12d9552691e",
+      "baseline_yaml_content_hash": "545f493fac9ef803cc767fe28e72a33fb49a5f978f6accd65da57b439042c82b"
     }
   },
   "version": "1.0"
