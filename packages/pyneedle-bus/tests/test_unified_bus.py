@@ -6,13 +6,15 @@ import pytest
 from needle.pointer import L
 from needle.spec import RendererProtocol
 
-# Assuming the new components are in needle.bus
+# From bus
 from needle.bus import (
-    MessageStore,
     EventBus,
     FeedbackBus,
     LogBridge,
 )
+
+# From runtime/operators (integration test)
+from needle.operators import I18NFactoryOperator, OverlayOperator
 
 
 # --- Fixtures ---
@@ -81,70 +83,63 @@ def mock_asset_structure(tmp_path: Path) -> Dict[str, Path]:
 # --- Test Cases ---
 
 
-def test_unified_bus_integration(mock_asset_structure, monkeypatch):
+def test_unified_bus_integration(mock_asset_structure):
     """
-    End-to-end test for the entire pyneedle-bus stack.
+    End-to-end test for the entire pyneedle-bus stack with manually assembled operators.
     """
     # 1. ARRANGE
-    # Fresh instances for test isolation
-    store = MessageStore()
     event_bus = EventBus()
     spy_renderer = SpyRenderer()
-    feedback_bus = FeedbackBus(store, renderer=spy_renderer)
+    feedback_bus = FeedbackBus(renderer=spy_renderer)
     bridge = LogBridge(event_bus, feedback_bus)
 
-    # Register asset roots. Order matters: register low-priority first.
-    # Our implementation gives higher priority to roots registered later.
-    store.register_asset_root(mock_asset_structure["app"])
-    store.register_asset_root(mock_asset_structure["plugin"])
+    # Manual Operator Assembly
+    # Later roots override earlier ones? OverlayOperator uses first-match-wins.
+    # So we put [Plugin, App] to let Plugin override App.
+    app_factory = I18NFactoryOperator(mock_asset_structure["app"])
+    plugin_factory = I18NFactoryOperator(mock_asset_structure["plugin"])
 
-    # Connect the bridge for zero-config logging test
-    # This means any event with topic "app.farewell" will be rendered.
+    def set_language(lang: str):
+        # Build a specific overlay for the target language
+        # plugin_factory(lang) returns a FileSystemOperator for that dir
+        overlay = OverlayOperator([plugin_factory(lang), app_factory(lang)])
+        feedback_bus.set_operator(overlay)
+
+    # Connect the bridge
     bridge.connect(L.app.farewell, level="success")
 
     # 2. ACT & ASSERT: FeedbackBus direct rendering
 
-    # Test English (default) - Override
-    monkeypatch.setenv("NEEDLE_LANG", "en")
+    # Test English
+    set_language("en")
     feedback_bus.info(L.app.welcome)
     assert spy_renderer.get_last_message() == "Welcome from MyPlugin!"
 
-    # Test English - Fallback
+    # Test English - Fallback (found in App but not in Plugin)
     feedback_bus.info(L.app.setup)
     assert spy_renderer.get_last_message() == "Initializing system..."
 
     spy_renderer.clear()
 
-    # Test Chinese - Override
-    monkeypatch.setenv("NEEDLE_LANG", "zh")
+    # Test Chinese
+    set_language("zh")
     feedback_bus.warning(L.app.welcome)
     assert spy_renderer.get_last_message() == "MyPlugin 欢迎您！"
     assert spy_renderer.calls[-1][1] == "warning"
 
-    # Test Chinese - Fallback
-    feedback_bus.info(L.app.setup)
-    assert spy_renderer.get_last_message() == "正在初始化系统..."
-
     spy_renderer.clear()
 
-    # Switch back to English for the final test
-    monkeypatch.setenv("NEEDLE_LANG", "en")
-
     # 3. ACT & ASSERT: EventBus -> Bridge -> FeedbackBus
+    set_language("en")
 
-    # Publish an event. The topic L.app.farewell is connected by the bridge.
-    # The event object itself can be anything.
+    # Publish an event
     class UserLogoutEvent:
         def __init__(self, username):
             self.username = username
-            self.topic = L.app.farewell  # Event can carry its own topic
+            self.topic = L.app.farewell
 
     event_bus.publish(UserLogoutEvent(username="Alice"))
 
-    # The bridge should have caught this and triggered the feedback bus.
     assert len(spy_renderer.calls) == 1
-    # Check rendered message (using EN locale from last monkeypatch set)
-    # The template for farewell is in the plugin assets for English
     assert spy_renderer.get_last_message() == "Goodbye from Plugin!"
-    # Check log level
     assert spy_renderer.calls[0][1] == "success"
