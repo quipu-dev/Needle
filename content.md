@@ -4,6 +4,7 @@
 
 ### 📝 变更文件摘要:
 ```
-packages/pyneedle-pointer/tests/test_pointer_algebra.py | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+packages/pyneedle-pointer/pyproject.toml | 2 +-
+ packages/pyneedle-spec/pyproject.toml    | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 ```

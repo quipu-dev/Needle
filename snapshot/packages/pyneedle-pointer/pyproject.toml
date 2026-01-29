@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyneedle-pointer"
-version = "0.1.4"
+version = "0.2.0"
 description = "Standard implementation of Semantic Pointers (L) for PyNeedle."
 authors = [
     { name = "doucx", email = "doucxldh@gmail.com" },
