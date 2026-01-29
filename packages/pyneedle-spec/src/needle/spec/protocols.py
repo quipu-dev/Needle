@@ -1,4 +1,4 @@
-from typing import Protocol, Any, Union, Iterable, TypeVar, runtime_checkable
+from typing import Protocol, Any, Union, Iterator, TypeVar, runtime_checkable
 
 # T_co is covariant, meaning SemanticPointerProtocol can return subtypes of itself
 T_Pointer = TypeVar("T_Pointer", bound="SemanticPointerProtocol", covariant=True)
@@ -6,6 +6,9 @@ T_Pointer = TypeVar("T_Pointer", bound="SemanticPointerProtocol", covariant=True
 
 @runtime_checkable
 class SemanticPointerProtocol(Protocol[T_Pointer]):
+    # Iterating a single pointer yields itself (Iterator of 1 item)
+    def __iter__(self) -> Iterator[T_Pointer]: ...
+
     def __getattr__(self, name: str) -> T_Pointer: ...
 
     def __str__(self) -> str: ...
@@ -27,7 +30,7 @@ class SemanticPointerProtocol(Protocol[T_Pointer]):
 
 @runtime_checkable
 class PointerSetProtocol(Protocol):
-    def __iter__(self) -> Iterable[SemanticPointerProtocol]: ...
+    def __iter__(self) -> Iterator[SemanticPointerProtocol]: ...
 
     def __getattr__(self, name: str) -> "PointerSetProtocol": ...
 

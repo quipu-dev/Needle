@@ -1,4 +1,4 @@
-from typing import Any, Union, Iterable, TYPE_CHECKING
+from typing import Any, Union, Iterable, Iterator, TYPE_CHECKING
 from needle.spec import SemanticPointerProtocol, PointerSetProtocol
 
 if TYPE_CHECKING:
@@ -11,6 +11,9 @@ class SemanticPointer(SemanticPointerProtocol):
     def __init__(self, path: str = ""):
         # Internal storage of the dot-separated path
         self._path = path
+
+    def __iter__(self) -> Iterator["SemanticPointer"]:
+        yield self
 
     def __getattr__(self, name: str) -> "SemanticPointer":
         new_path = f"{self._path}.{name}" if self._path else name
