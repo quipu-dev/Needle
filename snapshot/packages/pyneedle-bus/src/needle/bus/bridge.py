@@ -8,7 +8,7 @@ from .feedback import FeedbackBus
 class LogBridge:
     """
     Connects the EventBus (Logic) to the FeedbackBus (Presentation).
-    
+
     It listens for events and attempts to render them using the FeedbackBus.
     This enables 'Zero-Config Logging' if the Event Topic matches an I18n Key.
     """
@@ -18,17 +18,17 @@ class LogBridge:
         self.feedback_bus = feedback_bus
 
     def connect(
-        self, 
-        topic: Union[str, SemanticPointerProtocol, Type[Any]], 
+        self,
+        topic: Union[str, SemanticPointerProtocol, Type[Any]],
         ptr: Union[str, SemanticPointerProtocol, None] = None,
-        level: str = "info"
+        level: str = "info",
     ) -> None:
         """
         Explicitly map an Event Topic to a Feedback Pointer.
-        
+
         Args:
             topic: The event topic to listen for.
-            ptr: The I18n pointer to use for rendering. 
+            ptr: The I18n pointer to use for rendering.
                  If None, assumes topic IS the pointer (Auto-Bridge).
             level: The log level.
         """
@@ -54,12 +54,12 @@ class LogBridge:
                 data = event
             elif hasattr(event, "__dict__"):
                 data = event.__dict__
-            
-            # If the event payload is nested (like Cascade GenericEventIR), 
+
+            # If the event payload is nested (like Cascade GenericEventIR),
             # we might want to flatten it or pass specific parts.
             # For now, we pass the whole object structure and let format() access attributes.
             # e.g. "{payload.task_id}"
-            
+
             self.feedback_bus.present(target_ptr, level=level, **data)
-            
+
         self.event_bus.subscribe(topic, handler)

@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict
 
 from needle.operators import I18NFactoryOperator, OverlayOperator
 from needle.spec import OperatorProtocol
@@ -9,7 +9,7 @@ from needle.spec import OperatorProtocol
 class MessageStore:
     """
     Orchestrates resource loading using the PyNeedle Operator system.
-    
+
     Instead of manually loading JSONs, it maintains a list of 'Asset Roots'.
     When an operator is requested for a language, it builds an OverlayOperator
     that stacks I18NFactoryOperators for each root.
@@ -17,20 +17,20 @@ class MessageStore:
 
     def __init__(self):
         # List of paths where 'needle/<lang>/*.json' structures can be found.
-        # Order matters: later roots override earlier ones (if we prepend) 
-        # or earlier ones override later (if we prepend). 
+        # Order matters: later roots override earlier ones (if we prepend)
+        # or earlier ones override later (if we prepend).
         # Strategy: New roots are added to the FRONT of the list (High Priority).
         self._asset_roots: List[Path] = []
-        
+
         # Cache operators by language code
         self._operator_cache: Dict[str, OperatorProtocol] = {}
 
     def register_asset_root(self, path: Path) -> None:
         """
         Register a new directory containing 'needle' assets.
-        This directory should contain the 'needle' folder directly? 
+        This directory should contain the 'needle' folder directly?
         No, usually it points TO the 'needle' folder or the parent?
-        
+
         Convention: The path passed here MUST be the parent of the 'needle' directory.
         e.g. .../src/stitcher/assets  (which contains ./needle/en/...)
         """
@@ -51,10 +51,10 @@ class MessageStore:
         # Build the chain
         operators: List[OperatorProtocol] = []
         for root in self._asset_roots:
-            # I18NFactoryOperator takes the 'assets root' and 
+            # I18NFactoryOperator takes the 'assets root' and
             # internally appends "needle/<lang>" when called with a lang pointer.
             # But wait, I18NFactoryOperator(root)(lang_ptr) returns a FileSystemOperator.
-            
+
             factory = I18NFactoryOperator(root)
             # We treat the lang string as a pointer path (e.g. "en")
             # The factory resolves this to root/needle/en
@@ -64,7 +64,7 @@ class MessageStore:
         # Create the overlay
         # Operators are in priority order (Head of list = Highest Priority)
         overlay = OverlayOperator(operators)
-        
+
         self._operator_cache[lang] = overlay
         return overlay
 

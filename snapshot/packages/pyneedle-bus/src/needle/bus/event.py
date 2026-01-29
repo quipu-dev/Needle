@@ -1,8 +1,7 @@
-import time
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Type, Union, Optional
+from typing import Any, Callable, Dict, List, Type, Union
 
-from needle.spec import GenericEventIR, SemanticPointerProtocol
+from needle.spec import SemanticPointerProtocol
 
 # Type alias for event handlers
 # Handlers receive the raw event object (or Dict if published as dict)
@@ -20,15 +19,15 @@ class EventBus:
         # Mapping: Event Type (Class) -> List of Handlers
         self._type_subscribers: Dict[Type[Any], List[EventHandler]] = defaultdict(list)
         # Wildcard or special pattern subscribers could be added here
-        
+
     def subscribe(
-        self, 
-        topic: Union[str, SemanticPointerProtocol, Type[Any]], 
-        handler: EventHandler
+        self,
+        topic: Union[str, SemanticPointerProtocol, Type[Any]],
+        handler: EventHandler,
     ) -> None:
         """
         Subscribe to events.
-        
+
         Args:
             topic: Can be:
                    - A Semantic Pointer (L.run.started) -> converted to string "run.started"
@@ -43,29 +42,31 @@ class EventBus:
             key = str(topic)
             self._subscribers[key].append(handler)
 
-    def publish(self, event: Any, topic: Union[str, SemanticPointerProtocol, None] = None) -> None:
+    def publish(
+        self, event: Any, topic: Union[str, SemanticPointerProtocol, None] = None
+    ) -> None:
         """
         Dispatch an event to subscribers.
-        
+
         Args:
             event: The event object (dataclass, dict, etc.)
-            topic: Optional override for the topic. 
+            topic: Optional override for the topic.
                    If event has a 'topic' attribute or key, that is used by default.
                    If event is a SemanticPointer, it is treated as a signal (topic=event, data={}).
         """
         # 1. Determine the topic string
         resolved_topic: str = ""
-        
+
         if topic:
             resolved_topic = str(topic)
         elif hasattr(event, "topic"):
             resolved_topic = str(event.topic)
         elif isinstance(event, dict) and "topic" in event:
             resolved_topic = str(event["topic"])
-        elif hasattr(event, "__str__") and not hasattr(event, "__dict__"): 
-             # Edge case: publishing a bare SemanticPointer as a signal
-             resolved_topic = str(event)
-        
+        elif hasattr(event, "__str__") and not hasattr(event, "__dict__"):
+            # Edge case: publishing a bare SemanticPointer as a signal
+            resolved_topic = str(event)
+
         # 2. Dispatch by Topic (String matching)
         if resolved_topic:
             handlers = self._subscribers.get(resolved_topic)
@@ -80,5 +81,5 @@ class EventBus:
         if type_handlers:
             for handler in type_handlers:
                 handler(event)
-                
+
         # Future: Add wildcard matching (e.g. "run.*") if needed.

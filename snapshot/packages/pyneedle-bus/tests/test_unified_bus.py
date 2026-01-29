@@ -1,4 +1,3 @@
-import os
 import json
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
@@ -18,8 +17,10 @@ from needle.bus import (
 
 # --- Fixtures ---
 
+
 class SpyRenderer(RendererProtocol):
     """A mock renderer that captures calls instead of printing."""
+
     def __init__(self):
         self.calls: List[Tuple[str, str, Dict[str, Any]]] = []
 
@@ -63,19 +64,22 @@ def mock_asset_structure(tmp_path: Path) -> Dict[str, Path]:
 
     plugin_en_data = {
         "welcome": "Welcome from MyPlugin!",  # Override
-        "farewell": "Goodbye from Plugin!",    # New
+        "farewell": "Goodbye from Plugin!",  # New
     }
     plugin_zh_data = {
         "welcome": "MyPlugin 欢迎您！",
         "farewell": "插件再见！",
     }
     (plugin_en_dir / "app.json").write_text(json.dumps(plugin_en_data))
-    (plugin_zh_dir / "app.json").write_text(json.dumps(plugin_zh_data, ensure_ascii=False))
-    
+    (plugin_zh_dir / "app.json").write_text(
+        json.dumps(plugin_zh_data, ensure_ascii=False)
+    )
+
     return {"app": app_root, "plugin": plugin_root}
 
 
 # --- Test Cases ---
+
 
 def test_unified_bus_integration(mock_asset_structure, monkeypatch):
     """
@@ -99,18 +103,18 @@ def test_unified_bus_integration(mock_asset_structure, monkeypatch):
     bridge.connect(L.app.farewell, level="success")
 
     # 2. ACT & ASSERT: FeedbackBus direct rendering
-    
+
     # Test English (default) - Override
     monkeypatch.setenv("NEEDLE_LANG", "en")
     feedback_bus.info(L.app.welcome)
     assert spy_renderer.get_last_message() == "Welcome from MyPlugin!"
-    
+
     # Test English - Fallback
     feedback_bus.info(L.app.setup)
     assert spy_renderer.get_last_message() == "Initializing system..."
-    
+
     spy_renderer.clear()
-    
+
     # Test Chinese - Override
     monkeypatch.setenv("NEEDLE_LANG", "zh")
     feedback_bus.warning(L.app.welcome)
@@ -127,16 +131,16 @@ def test_unified_bus_integration(mock_asset_structure, monkeypatch):
     monkeypatch.setenv("NEEDLE_LANG", "en")
 
     # 3. ACT & ASSERT: EventBus -> Bridge -> FeedbackBus
-    
+
     # Publish an event. The topic L.app.farewell is connected by the bridge.
     # The event object itself can be anything.
     class UserLogoutEvent:
         def __init__(self, username):
             self.username = username
-            self.topic = L.app.farewell # Event can carry its own topic
+            self.topic = L.app.farewell  # Event can carry its own topic
 
     event_bus.publish(UserLogoutEvent(username="Alice"))
-    
+
     # The bridge should have caught this and triggered the feedback bus.
     assert len(spy_renderer.calls) == 1
     # Check rendered message (using EN locale from last monkeypatch set)
